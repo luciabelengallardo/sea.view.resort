@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  /* Allow page scrolling by default; modals will temporarily lock scroll when needed */
+  overflow: auto;
+}
+
+:root {
+  --radius: 0.5rem;
+  /* 8px, radio suave por defecto para rounded-lg */
+}
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 font-sans;
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .hero-standard {
+    /* Altura del hero aumentada para ocupar más pantalla */
+    @apply h-[80vh] min-h-[600px] md:h-[85vh] lg:h-[90vh];
+  }
+
+  .section-standard {
+    /* Altura mínima para secciones de contenido */
+    @apply min-h-[600px] py-16;
+  }
+
+  /* Oculta el icono nativo del datepicker en WebKit para inputs con clase date-input */
+  .date-input::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    display: none;
+  }
+}

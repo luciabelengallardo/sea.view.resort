@@ -1,0 +1,19 @@
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Amenities pills styling to resemble the reference image */
+.amenity-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: #efe4d2;
+  /* beige, similar to design */
+  color: #111;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
