@@ -50,11 +50,13 @@ export const register = async (req, res) => {
       role: savedUser.role,
     });
 
-    res.cookie("token", token, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    });
+      secure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
+      sameSite: process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax"),
+    };
+
+    res.cookie("token", token, cookieOptions);
 
     res.status(201).json({
       id: savedUser._id,
@@ -98,11 +100,13 @@ export const login = async (req, res) => {
       role: userMatch.role,
     });
 
-    res.cookie("token", token, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    });
+      secure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
+      sameSite: process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax"),
+    };
+
+    res.cookie("token", token, cookieOptions);
 
     res.status(200).json({
       id: userMatch._id,
@@ -120,7 +124,14 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.cookie("token", "", { expires: new Date(0) });
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
+      sameSite: process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax"),
+      expires: new Date(0),
+    };
+
+    res.cookie("token", "", cookieOptions);
 
     res.status(200).json({ message: "Sesión cerrada" });
   } catch (error) {
