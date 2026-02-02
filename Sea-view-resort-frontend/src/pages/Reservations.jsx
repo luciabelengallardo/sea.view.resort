@@ -4,6 +4,7 @@ import { apiUrl, fetchApi } from "../services/http";
 
 export default function Reservations() {
   const [reservas, setReservas] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ roomId: "", destino: "playa", huespedes: 1, checkIn: "", checkOut: "" });
   const [error, setError] = useState(null);
@@ -22,13 +23,43 @@ export default function Reservations() {
     }
   };
 
+  const loadRooms = async () => {
+    try {
+      const res = await fetchApi("/api/rooms");
+      if (!res.ok) return;
+      const data = await res.json();
+      setRooms(data);
+    } catch (e) {
+      // ignore
+    }
+  };
+
   useEffect(() => { load(); }, []);
+  useEffect(() => { loadRooms(); }, []);
 
   const handleChange = (e) => setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    // Client-side validations
+    if (!form.roomId) return setError("Seleccione una habitación");
+    if (!form.checkIn || !form.checkOut) return setError("Seleccione fechas de entrada y salida");
+    if (new Date(form.checkOut) <= new Date(form.checkIn)) return setError("La fecha de salida debe ser posterior a la de entrada");
+    if (!Number.isInteger(Number(form.huespedes)) || Number(form.huespedes) < 1) return setError("Cantidad de huéspedes inválida");
+
+    // Check availability via API
+    try {
+      const availRes = await fetchApi(`/api/reservas/rooms/${form.roomId}/disponibilidad?checkIn=${encodeURIComponent(form.checkIn)}&checkOut=${encodeURIComponent(form.checkOut)}`);
+      if (!availRes.ok) {
+        const body = await availRes.json().catch(() => ({}));
+        return setError(body.error || body.message || "Error comprobando disponibilidad");
+      }
+      const avail = await availRes.json();
+      if (!avail.disponible) return setError("La habitación no está disponible en esas fechas");
+    } catch (err) {
+      return setError("Error comprobando disponibilidad");
+    }
     try {
       const res = await fetchApi("/api/reservas", {
         method: "POST",
@@ -70,8 +101,13 @@ export default function Reservations() {
         <h2 className="font-semibold">Crear reserva</h2>
         <form onSubmit={handleSubmit} className="space-y-2 max-w-md">
           <label className="block">
-            RoomId
-            <input name="roomId" value={form.roomId} onChange={handleChange} className="mt-1 w-full" />
+            Habitación
+            <select name="roomId" value={form.roomId} onChange={handleChange} className="mt-1 w-full">
+              <option value="">-- Seleccione --</option>
+              {rooms.map((r) => (
+                <option key={r._id} value={r._id}>{r.name} — ${r.price}</option>
+              ))}
+            </select>
           </label>
           <label className="block">
             Check In
