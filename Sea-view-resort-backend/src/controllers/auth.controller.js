@@ -159,9 +159,13 @@ export const verifyToken = async (req, res) => {
 
     if (authHeaders && authHeaders.startsWith("Bearer ")) {
       token = authHeaders.split(" ")[1];
-    } else {
-      return res.status(401).json({ message: "Token no recibido" });
     }
+
+    if (!token && req.cookies?.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) return res.status(401).json({ message: "Token no recibido" });
 
     const decoded = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
     const userMatch = await User.findById(decoded.id);
