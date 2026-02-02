@@ -39,11 +39,19 @@ app.get("/", (req, res) => {
   res.send("API funcionando 🚀");
 });
 
+// Health check endpoint (activo solo en desarrollo o si se habilita explícitamente)
+if (process.env.ENABLE_HEALTH === "true" || process.env.NODE_ENV !== "production") {
+  app.get("/health", (req, res) => {
+    res.json({ status: "ok", time: new Date().toISOString() });
+  });
+}
+
 const routeFiles = fs.readdirSync("./src/routes");
 routeFiles.forEach((file) => {
   import(`./src/routes/${file}`)
     .then((route) => {
-      app.use("/api/v1", route.default);
+      const name = file.replace(".routes.js", "").replace(".js", "");
+      app.use(`/api/${name}`, route.default);
     })
     .catch((err) => {
       console.error(`Error al cargar la ruta ${file}:`, err);
