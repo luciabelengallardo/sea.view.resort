@@ -13,7 +13,12 @@ export function apiUrl(path) {
 }
 
 export function fetchApi(path, options) {
-  return fetch(apiUrl(path), options);
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers = new Headers(options?.headers || {});
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+
+  const opts = { ...options, headers };
+  return fetch(apiUrl(path), opts);
 }
 
 
