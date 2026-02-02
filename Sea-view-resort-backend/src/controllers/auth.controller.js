@@ -21,6 +21,7 @@ export const register = async (req, res) => {
     const verificationToken = crypto.randomBytes(20).toString("hex");
 
     const newUser = new User({
+      username: email,
       email,
       password: passwordHash,
       verificationToken,
