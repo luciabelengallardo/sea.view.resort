@@ -5,10 +5,13 @@ export const protect = (req, res, next) => {
   let token;
 
   // aquí lo que hago es verificar si el token viene en el header Authorization: Bearer <token>
-  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     try {
       token = req.headers.authorization.split(" ")[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.SECRET_KEY_TOKEN);
 
       // y guardo el payload en req.user (puede ser el id y rol)
       req.user = decoded;
@@ -19,7 +22,9 @@ export const protect = (req, res, next) => {
   }
 
   // si no viene token
-  return res.status(401).json({ message: "No autorizado, token no encontrado" });
+  return res
+    .status(401)
+    .json({ message: "No autorizado, token no encontrado" });
 };
 
 // Middleware para permitir solo administradores
@@ -29,5 +34,7 @@ export const isAdmin = (req, res, next) => {
     return next();
   }
   // si no es admin
-  return res.status(403).json({ message: "Acceso denegado: solo administradores" });
+  return res
+    .status(403)
+    .json({ message: "Acceso denegado: solo administradores" });
 };

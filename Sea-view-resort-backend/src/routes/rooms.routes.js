@@ -1,3 +1,4 @@
+import express from "express";
 import {
   createRoom,
   deleteImage,
@@ -8,6 +9,8 @@ import {
   uploadImage,
 } from "../controllers/rooms.controller.js";
 import { upload } from "../middlewares/upload.js";
+import { authRequired } from "../middlewares/validateToken.js";
+import { authRole } from "../middlewares/verifyRole.js";
 
 const router = express.Router();
 
@@ -21,13 +24,13 @@ router.post(
   authRequired,
   authRole(["admin"]),
   upload.single("image"),
-  uploadImage
+  uploadImage,
 );
 router.delete(
   "/:id/images/:index",
   authRequired,
   authRole(["admin"]),
-  deleteImage
+  deleteImage,
 );
 
 export default router;

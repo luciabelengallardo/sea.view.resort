@@ -29,6 +29,30 @@ app.use(urlencoded({ extended: true }));
 app.use(morgan("dev"));
 app.use(cookieParser());
 
+// Request timing logger + simple timeout to detect blocking handlers
+app.use((req, res, next) => {
+  req._startAt = Date.now();
+  const timeoutMs = 15000; // 15s
+  const timer = setTimeout(() => {
+    console.error(
+      `Request timeout: ${req.method} ${req.originalUrl} - ${Date.now() - req._startAt}ms`,
+    );
+    if (!res.headersSent) {
+      res.status(504).json({ message: "Request timeout (debug)" });
+    }
+  }, timeoutMs);
+
+  res.on("finish", () => {
+    clearTimeout(timer);
+    const duration = Date.now() - req._startAt;
+    console.log(
+      `${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms`,
+    );
+  });
+
+  next();
+});
+
 // --- Rutas ---
 // app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 // app.use("/api/rooms", roomsRouter);
@@ -40,18 +64,24 @@ app.get("/", (req, res) => {
 });
 
 // Health check endpoint (activo solo en desarrollo o si se habilita explícitamente)
-if (process.env.ENABLE_HEALTH === "true" || process.env.NODE_ENV !== "production") {
+if (
+  process.env.ENABLE_HEALTH === "true" ||
+  process.env.NODE_ENV !== "production"
+) {
   app.get("/health", (req, res) => {
     res.json({ status: "ok", time: new Date().toISOString() });
   });
 }
 
 const routeFiles = fs.readdirSync("./src/routes");
+const mounted = new Set();
 routeFiles.forEach((file) => {
+  const base = file.replace(/\.routes?\.js$/, "").replace(/\.js$/, "");
+  if (mounted.has(base)) return; // skip duplicate route files (keep first)
+  mounted.add(base);
   import(`./src/routes/${file}`)
     .then((route) => {
-      const name = file.replace(".routes.js", "").replace(".js", "");
-      app.use(`/api/${name}`, route.default);
+      app.use(`/api/${base}`, route.default);
     })
     .catch((err) => {
       console.error(`Error al cargar la ruta ${file}:`, err);

@@ -4,11 +4,8 @@ import crypto from "crypto";
 import { createToken } from "../helpers/jwt.js";
 import transport from "../helpers/mailer.js";
 import jwt from "jsonwebtoken";
-import { email, success } from "zod";
-import { error } from "console";
 
 export const register = async (req, res) => {
-  console.log("Body recibido:", req.body);
   try {
     const { email, password } = req.body;
 
@@ -53,9 +50,9 @@ export const register = async (req, res) => {
     });
 
     res.cookie("token", token, {
-      httpOnly: process.env.NODE_ENV !== "development",
-      secure: true,
-      sameSite: "none",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
     res.status(201).json({
@@ -67,7 +64,7 @@ export const register = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -102,8 +99,8 @@ export const login = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
     res.status(200).json({
@@ -115,7 +112,7 @@ export const login = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -126,7 +123,7 @@ export const logout = async (req, res) => {
 
     res.status(200).json({ message: "Sesión cerrada" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -148,7 +145,7 @@ export const profile = async (req, res) => {
       role: userMatch.role,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -211,6 +208,7 @@ export const verifyEmail = async (req, res) => {
     user.isVerified = true;
     user.verificationToken = undefined;
     await user.save();
+    return res.status(200).json({ success: true, message: "Email verificado" });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: error.message });

@@ -5,10 +5,11 @@ import {
   createRoom,
   updateRoom,
   deleteRoom,
-  addImages,     // <- cambiado
-  deleteImage,   // <- cambiado
+  addImages, // <- cambiado
+  deleteImage, // <- cambiado
 } from "../controllers/roomController.js";
-import { protect, isAdmin } from "../middlewares/authMiddleware.js";
+import { authRequired } from "../middlewares/validateToken.js";
+import { authRole } from "../middlewares/verifyRole.js";
 
 const router = express.Router();
 
@@ -33,23 +34,23 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage,
-  limits: { fileSize: 4 * 1024 * 1024 }, 
+  limits: { fileSize: 4 * 1024 * 1024 },
   fileFilter,
 });
 
 router.get("/", getRooms);
-router.post("/", protect, isAdmin, createRoom);
-router.put("/:id", protect, isAdmin, updateRoom);
-router.delete("/:id", protect, isAdmin, deleteRoom);
+router.post("/", authRequired, authRole(["admin"]), createRoom);
+router.put("/:id", authRequired, authRole(["admin"]), updateRoom);
+router.delete("/:id", authRequired, authRole(["admin"]), deleteRoom);
 
 router.post(
   "/:id/photos",
-  protect,
-  isAdmin,
+  authRequired,
+  authRole(["admin"]),
   upload.array("photos", 5), // máximo 5 imágenes por solicitud
-  addImages
+  addImages,
 );
 
-router.delete("/:id/photos", protect, isAdmin, deleteImage);
+router.delete("/:id/photos", authRequired, authRole(["admin"]), deleteImage);
 
 export default router;
