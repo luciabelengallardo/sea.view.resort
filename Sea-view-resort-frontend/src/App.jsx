@@ -12,6 +12,7 @@ import { useAuth } from "./context/AuthContext.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Profile from "./pages/Profile.jsx";
+import Reservations from "./pages/Reservations.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 import ForgotPassword from "./pages/ForgotPassword.jsx";
 import PasswordChange from "./pages/PasswordChange.jsx";
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="explore" element={<Explore />} />
           <Route path="rooms" element={<Rooms />} />
           <Route path="rooms/:id" element={<RoomDetail />} />
+          <Route path="reservas" element={<ProtectedRoute><Reservations /></ProtectedRoute>} />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="optimize" element={<ImageOptimizer />} />
