@@ -18,7 +18,8 @@ export const login = async (data) => {
 
     if (res?.data?.token) {
       localStorage.setItem("token", res.data.token);
-      axios.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+      axios.defaults.headers.common["Authorization"] =
+        `Bearer ${res.data.token}`;
     }
 
     return {
@@ -31,7 +32,8 @@ export const login = async (data) => {
       },
     };
   } catch (error) {
-    throw new Error("Error al intentar iniciar sesion");
+    console.error("Login error:", error);
+    throw error;
   }
 };
 

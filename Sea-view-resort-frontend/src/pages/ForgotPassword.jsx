@@ -11,21 +11,35 @@ function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submitted with email:", email);
     setMessage(null);
     setError(null);
 
-    const res = await fetch(apiUrl(`/api/v1/password-reset-request`), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
-    });
+    if (!email) {
+      setError("Por favor ingresa tu email");
+      return;
+    }
 
-    const data = await res.json();
+    try {
+      console.log("Calling API:", apiUrl(`/api/auth/password-reset-request`));
+      const res = await fetch(apiUrl(`/api/auth/password-reset-request`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
-    if (res.ok) {
-      setMessage(data.message || "Email enviado");
-    } else {
-      setError(data.message || "Error");
+      console.log("Response status:", res.status);
+      const data = await res.json();
+      console.log("Response data:", data);
+
+      if (res.ok) {
+        setMessage(data.message || "Email enviado");
+      } else {
+        setError(data.message || "Error");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setError("Error al enviar la solicitud: " + err.message);
     }
   };
 
@@ -38,7 +52,9 @@ function ForgotPassword() {
       >
         <div className="h-full w-full bg-black/20 flex items-end p-8 text-white">
           <div>
-            <h3 className="text-2xl font-semibold">Recuperá el acceso a tu cuenta</h3>
+            <h3 className="text-2xl font-semibold">
+              Recuperá el acceso a tu cuenta
+            </h3>
             <ul className="mt-3 space-y-1 text-sm text-white/90">
               <li>• Te enviaremos instrucciones por email</li>
               <li>• Podrás crear una nueva contraseña</li>
@@ -74,7 +90,9 @@ function ForgotPassword() {
             </div>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">Recuperar contraseña</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+            Recuperar contraseña
+          </h2>
 
           <div className="relative mb-6">
             <input
@@ -95,14 +113,23 @@ function ForgotPassword() {
             </label>
           </div>
 
-          <Button className="w-full mb-4">Enviar instrucciones</Button>
+          <Button type="submit" className="w-full mb-4">
+            Enviar instrucciones
+          </Button>
 
-          {message && <p className="text-[rgb(150,130,96)] text-center">{message}</p>}
+          {message && (
+            <p className="text-[rgb(150,130,96)] text-center">{message}</p>
+          )}
           {error && <p className="text-red-500 mt-3 text-center">{error}</p>}
 
           <p className="mt-4 text-center text-sm">
             ¿Recordaste tu contraseña? {""}
-            <Link to="/login" className="text-[rgb(150,130,96)] hover:underline">Inicia sesión</Link>
+            <Link
+              to="/login"
+              className="text-[rgb(150,130,96)] hover:underline"
+            >
+              Inicia sesión
+            </Link>
           </p>
         </form>
       </div>

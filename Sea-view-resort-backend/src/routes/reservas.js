@@ -1,21 +1,26 @@
 import express from "express";
 import {
   getRoomDisponibilidad,
+  getOccupiedDates,
   createReserva,
   getReservas,
   updateReserva,
-  deleteReserva
+  deleteReserva,
 } from "../controllers/roomClienteController.js";
+import { authRequired } from "../middlewares/validateToken.js";
 
 const router = express.Router();
 
 // Disponibilidad de habitación
 router.get("/rooms/:id/disponibilidad", getRoomDisponibilidad);
 
-// CRUD reservas
-router.post("/reservas", createReserva);
-router.get("/reservas", getReservas);
-router.put("/reservas/:id", updateReserva);
-router.delete("/reservas/:id", deleteReserva);
+// Fechas ocupadas de una habitación (sin autenticación)
+router.get("/rooms/:id/occupied-dates", getOccupiedDates);
+
+// CRUD reservas (autenticación requerida) - rutas montadas en /api/reservas
+router.post("/", authRequired, createReserva);
+router.get("/", authRequired, getReservas);
+router.put("/:id", authRequired, updateReserva);
+router.delete("/:id", authRequired, deleteReserva);
 
 export default router;

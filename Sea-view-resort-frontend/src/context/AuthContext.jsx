@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     const { token, user } = await authService.login(credentials);
     console.log("Login exitoso - Token", token);
-    localStorage.setItem("token", token);
     // Actualizamos el usuario con la respuesta básica y luego cargamos el perfil completo
     setUser(user);
     const profileData = await getProfile();
@@ -27,15 +26,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    localStorage.removeItem("token");
+    try {
+      await fetch(apiUrl("/api/auth/logout"), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+    } catch (e) {
+      // ignore network errors on logout
+    }
+    authService.logoutLocal();
     setUser(null);
     setProfileImage(null);
-    await fetch(apiUrl("/api/v1/logout"), {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-      },
-    });
   };
 
   const getProfile = async () => {
@@ -48,7 +51,7 @@ export const AuthProvider = ({ children }) => {
     setUser(data);
 
     if (data.profileImage) {
-      const base = import.meta.env.VITE_PUBLIC_API_BASE || '';
+      const base = import.meta.env.VITE_PUBLIC_API_BASE || "";
       setProfileImage(`${base}${data.profileImage}`);
     }
     return data;

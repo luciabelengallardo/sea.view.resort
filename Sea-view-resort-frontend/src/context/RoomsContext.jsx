@@ -10,20 +10,26 @@ export function RoomsProvider({ children }) {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const { data } = await axios.get(apiUrl("/api/rooms"));
-        const backendRooms = data.datos || [];
+        const resp = await axios.get(apiUrl("/api/rooms"));
+        const data = resp.data;
+        // Backend puede devolver { datos: [...] } o directamente un array
+        const backendRooms = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.datos)
+            ? data.datos
+            : [];
 
         const normalized = backendRooms.map((room) => ({
           ...room,
+          id: room._id || room.id,
           images: (room.images || []).map((img) =>
-            img.startsWith("http") ? img : `${apiUrl("")}${img}`,
+            String(img).startsWith("http") ? img : `${apiUrl("")}${img}`,
           ),
         }));
 
         setRooms(normalized);
       } catch (error) {
         console.error("No se pudo conectar al backend:", error);
-        // ✅ Deja rooms como [] SIN imágenes locales
         setRooms([]);
       }
     };

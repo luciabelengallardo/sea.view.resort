@@ -8,10 +8,7 @@ config();
 // In development or when DISABLE_MAILER=true we provide a noop transport
 // to avoid blocking the server if SMTP is unreachable.
 let transport;
-if (
-  process.env.DISABLE_MAILER === "true" ||
-  process.env.NODE_ENV !== "production"
-) {
+if (process.env.DISABLE_MAILER === "true") {
   transport = {
     sendMail: async (mailOptions) => {
       console.log("[mailer] disabled - would send:", {

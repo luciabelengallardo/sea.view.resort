@@ -6,9 +6,8 @@ import { fileURLToPath } from "node:url";
 import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
-import roomsRouter from "./src/routes/rooms.js";
-import reservasRouter from "./src/routes/reservas.js";
-import authRoutes from "./src/routes/auth.routes.js";
+// Routes are loaded dynamically from ./src/routes to avoid duplicate mounts
+// and keep a single source of truth per route file.
 
 dotenv.config({ quiet: true });
 

@@ -6,7 +6,13 @@ export default function Reservations() {
   const [reservas, setReservas] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ roomId: "", destino: "playa", huespedes: 1, checkIn: "", checkOut: "" });
+  const [form, setForm] = useState({
+    roomId: "",
+    destino: "playa",
+    huespedes: 1,
+    checkIn: "",
+    checkOut: "",
+  });
   const [error, setError] = useState(null);
 
   const load = async () => {
@@ -34,29 +40,42 @@ export default function Reservations() {
     }
   };
 
-  useEffect(() => { load(); }, []);
-  useEffect(() => { loadRooms(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
+  useEffect(() => {
+    loadRooms();
+  }, []);
 
-  const handleChange = (e) => setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+  const handleChange = (e) =>
+    setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     // Client-side validations
     if (!form.roomId) return setError("Seleccione una habitación");
-    if (!form.checkIn || !form.checkOut) return setError("Seleccione fechas de entrada y salida");
-    if (new Date(form.checkOut) <= new Date(form.checkIn)) return setError("La fecha de salida debe ser posterior a la de entrada");
-    if (!Number.isInteger(Number(form.huespedes)) || Number(form.huespedes) < 1) return setError("Cantidad de huéspedes inválida");
+    if (!form.checkIn || !form.checkOut)
+      return setError("Seleccione fechas de entrada y salida");
+    if (new Date(form.checkOut) <= new Date(form.checkIn))
+      return setError("La fecha de salida debe ser posterior a la de entrada");
+    if (!Number.isInteger(Number(form.huespedes)) || Number(form.huespedes) < 1)
+      return setError("Cantidad de huéspedes inválida");
 
     // Check availability via API
     try {
-      const availRes = await fetchApi(`/api/reservas/rooms/${form.roomId}/disponibilidad?checkIn=${encodeURIComponent(form.checkIn)}&checkOut=${encodeURIComponent(form.checkOut)}`);
+      const availRes = await fetchApi(
+        `/api/reservas/rooms/${form.roomId}/disponibilidad?checkIn=${encodeURIComponent(form.checkIn)}&checkOut=${encodeURIComponent(form.checkOut)}`,
+      );
       if (!availRes.ok) {
         const body = await availRes.json().catch(() => ({}));
-        return setError(body.error || body.message || "Error comprobando disponibilidad");
+        return setError(
+          body.error || body.message || "Error comprobando disponibilidad",
+        );
       }
       const avail = await availRes.json();
-      if (!avail.disponible) return setError("La habitación no está disponible en esas fechas");
+      if (!avail.disponible)
+        return setError("La habitación no está disponible en esas fechas");
     } catch (err) {
       return setError("Error comprobando disponibilidad");
     }
@@ -77,7 +96,13 @@ export default function Reservations() {
         throw new Error(body.error || body.message || "Error al crear reserva");
       }
       await load();
-      setForm({ roomId: "", destino: "playa", huespedes: 1, checkIn: "", checkOut: "" });
+      setForm({
+        roomId: "",
+        destino: "playa",
+        huespedes: 1,
+        checkIn: "",
+        checkOut: "",
+      });
     } catch (err) {
       setError(err.message);
     }
@@ -102,31 +127,64 @@ export default function Reservations() {
         <form onSubmit={handleSubmit} className="space-y-2 max-w-md">
           <label className="block">
             Habitación
-            <select name="roomId" value={form.roomId} onChange={handleChange} className="mt-1 w-full">
+            <select
+              name="roomId"
+              value={form.roomId}
+              onChange={handleChange}
+              className="mt-1 w-full"
+            >
               <option value="">-- Seleccione --</option>
               {rooms.map((r) => (
-                <option key={r._id} value={r._id}>{r.name} — ${r.price}</option>
+                <option key={r._id} value={r._id}>
+                  {r.name} — ${r.price}
+                </option>
               ))}
             </select>
           </label>
           <label className="block">
             Check In
-            <input type="date" name="checkIn" value={form.checkIn} onChange={handleChange} className="mt-1 w-full" />
+            <input
+              type="date"
+              name="checkIn"
+              value={form.checkIn}
+              onChange={handleChange}
+              className="mt-1 w-full"
+            />
           </label>
           <label className="block">
             Check Out
-            <input type="date" name="checkOut" value={form.checkOut} onChange={handleChange} className="mt-1 w-full" />
+            <input
+              type="date"
+              name="checkOut"
+              value={form.checkOut}
+              onChange={handleChange}
+              className="mt-1 w-full"
+            />
           </label>
           <label className="block">
             Huéspedes
-            <input type="number" min={1} name="huespedes" value={form.huespedes} onChange={handleChange} className="mt-1 w-full" />
+            <input
+              type="number"
+              min={1}
+              name="huespedes"
+              value={form.huespedes}
+              onChange={handleChange}
+              className="mt-1 w-full"
+            />
           </label>
           <label className="block">
             Destino
-            <input name="destino" value={form.destino} onChange={handleChange} className="mt-1 w-full" />
+            <input
+              name="destino"
+              value={form.destino}
+              onChange={handleChange}
+              className="mt-1 w-full"
+            />
           </label>
           <div>
-            <button className="px-3 py-2 bg-blue-600 text-white rounded">Reservar</button>
+            <button className="px-3 py-2 bg-blue-600 text-white rounded">
+              Reservar
+            </button>
           </div>
           {error && <p className="text-red-600">{error}</p>}
         </form>
@@ -139,14 +197,29 @@ export default function Reservations() {
         ) : (
           <ul className="space-y-2">
             {reservas.map((r) => (
-              <li key={r._id} className="p-3 border rounded flex justify-between items-start">
+              <li
+                key={r._id}
+                className="p-3 border rounded flex justify-between items-start"
+              >
                 <div>
-                  <div className="font-semibold">{r.roomId?.name || r.roomId}</div>
-                  <div className="text-sm text-gray-600">{new Date(r.checkIn).toLocaleDateString()} → {new Date(r.checkOut).toLocaleDateString()}</div>
-                  <div className="text-sm">Huéspedes: {r.huespedes} · Destino: {r.destino}</div>
+                  <div className="font-semibold">
+                    {r.roomId?.name || r.roomId}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {new Date(r.checkIn).toLocaleDateString()} →{" "}
+                    {new Date(r.checkOut).toLocaleDateString()}
+                  </div>
+                  <div className="text-sm">
+                    Huéspedes: {r.huespedes} · Destino: {r.destino}
+                  </div>
                 </div>
                 <div>
-                  <button onClick={() => handleDelete(r._id)} className="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+                  <button
+                    onClick={() => handleDelete(r._id)}
+                    className="px-2 py-1 bg-red-500 text-white rounded"
+                  >
+                    Eliminar
+                  </button>
                 </div>
               </li>
             ))}

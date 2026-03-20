@@ -8,15 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/Card";
-import {
-  Bed,
-  Calendar,
-  Users,
-  Menu,
-  X,
-  User,
-  LogOut,
-} from "lucide-react";
+import { Bed, Calendar, Users, Menu, X, User, LogOut } from "lucide-react";
 import AdminDashboard from "./AdminDashboard";
 import AdminReservations from "./AdminReservations";
 import AdminRooms from "./AdminRooms";
@@ -34,7 +26,6 @@ export default function Administrador() {
       id: "habitaciones",
       label: "Habitaciones",
       icon: Bed,
-
     },
     {
       id: "reservas",
@@ -167,19 +158,30 @@ export default function Administrador() {
                     <li key={item.id}>
                       <Button
                         variant={isActive ? "default" : "ghost"}
-                        className={`w-full justify-start gap-2 py-4 px-4 rounded-lg transition-colors ${isActive
+                        className={`w-full justify-start gap-2 py-4 px-4 rounded-lg transition-colors ${
+                          isActive
                             ? "bg-resort-olive/10 hover:bg-resort-olive/20 text-resort-olive border border-resort-olive/20"
                             : "hover:bg-gray-50"
-                          }`}
+                        }`}
                         onClick={() => {
                           setActiveTab(item.id);
                           setSidebarOpen(false);
                         }}
                       >
-                        <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-resort-olive" : "text-gray-600"}`} />
+                        <Icon
+                          className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-resort-olive" : "text-gray-600"}`}
+                        />
                         <div className="flex-1 text-left flex flex-col min-w-0">
-                          <div className={`font-medium truncate ${isActive ? "text-resort-olive" : ""}`}>{item.label}</div>
-                          <div className={`text-xs ${isActive ? "text-resort-olive/70" : "opacity-70"}`}>{item.description}</div>
+                          <div
+                            className={`font-medium truncate ${isActive ? "text-resort-olive" : ""}`}
+                          >
+                            {item.label}
+                          </div>
+                          <div
+                            className={`text-xs ${isActive ? "text-resort-olive/70" : "opacity-70"}`}
+                          >
+                            {item.description}
+                          </div>
                         </div>
                       </Button>
                     </li>
@@ -199,7 +201,7 @@ export default function Administrador() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 min-h-0 overflow-hidden">
+        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
           {/* Mobile overlay */}
           {sidebarOpen && (
             <div
@@ -209,7 +211,7 @@ export default function Administrador() {
           )}
 
           {/* Content */}
-          <div className="min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] p-6 overflow-auto">
+          <div className="p-6">
             {renderContent() || (
               <div className="flex items-center justify-center h-full">
                 <p className="text-gray-600">Cargando contenido...</p>

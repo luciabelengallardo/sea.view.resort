@@ -11,26 +11,55 @@ function PasswordChange() {
   const navigate = useNavigate();
 
   const token = params.get("token");
+
+  if (!token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <div className="bg-white p-6 rounded shadow-md w-full max-w-sm text-center">
+          <p className="text-red-500">Token inválido o expirado</p>
+        </div>
+      </div>
+    );
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(null);
     setError(null);
 
-    const res = await fetch(apiUrl(`/api/v1/password-change/${token}`), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ newPassword: password }),
-    });
+    if (!password) {
+      setError("Por favor ingresa una contraseña");
+      return;
+    }
 
-    const data = await res.json();
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
 
-    if (res.ok) {
-      setMessage(data.message || "Contraseña actualizada");
-      setTimeout(() => {
-        navigate("/login");
-      }, 2500);
-    } else {
-      setError(data.message || "Error al actualizar contraseña");
+    try {
+      console.log("Enviando password change con token:", token);
+      const res = await fetch(apiUrl(`/api/auth/password-change/${token}`), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: password }),
+      });
+
+      console.log("Response status:", res.status);
+      const data = await res.json();
+      console.log("Response data:", data);
+
+      if (res.ok) {
+        setMessage(data.message || "Contraseña actualizada correctamente");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2500);
+      } else {
+        setError(data.message || "Error al actualizar contraseña");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setError("Error al procesar la solicitud: " + err.message);
     }
   };
 
@@ -51,7 +80,9 @@ function PasswordChange() {
           required
         />
 
-        <Button className="w-full">Cambiar contraseña</Button>
+        <Button type="submit" className="w-full">
+          Cambiar contraseña
+        </Button>
 
         {message && <p className="text-[rgb(150,130,96)]  mt-3">{message}</p>}
         {error && <p className="text-red-500 mt-3">{error}</p>}

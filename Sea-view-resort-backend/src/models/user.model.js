@@ -8,6 +8,14 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    firstName: {
+      type: String,
+      default: "",
+    },
+    lastName: {
+      type: String,
+      default: "",
+    },
     email: {
       type: String,
       require: true,
@@ -18,7 +26,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       require: true,
     },
-
+    phone: {
+      type: String,
+      default: "",
+    },
+    bio: {
+      type: String,
+      default: "",
+    },
     profileImage: {
       type: String,
       default:
@@ -49,7 +64,7 @@ const userSchema = new mongoose.Schema(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
 export default mongoose.model("User", userSchema);

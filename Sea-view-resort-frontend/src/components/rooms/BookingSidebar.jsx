@@ -41,7 +41,7 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
       d.setDate(d.getDate() + 1);
       return d.toISOString().split("T")[0];
     })(),
-    huespedes: "2",
+    huespedes: "2 Adultos",
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -113,6 +113,7 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
       );
 
       // Procesar la respuesta
+      console.log("Respuesta de disponibilidad:", availabilityResponse);
       const mockData = {
         ...bookingData,
         habitacion: roomName,
@@ -122,7 +123,9 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
         precioPorNoche: pricePerNight,
         noches: nights,
         precioTotal: total,
+        diasDisponibles: availabilityResponse.alternativeDates || [], // Agregar fechas alternativas del backend
       };
+      console.log("Fechas disponibles:", diasDisponibles);
 
       setAvailabilityData(mockData);
       setIsModalOpen(true);
@@ -168,6 +171,16 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
 
   const handleSelectAlternativeDate = async (selectedDate) => {
     try {
+      // Convertir selectedDate a YYYY-MM-DD string
+      const dateToISOString = (date) => {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+
+      const checkInString = dateToISOString(selectedDate);
       const checkInDate = new Date(selectedDate);
       const originalCheckIn = new Date(bookingData.checkIn);
       const originalCheckOut = new Date(bookingData.checkOut);
@@ -177,11 +190,12 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
 
       const newCheckOutDate = new Date(checkInDate);
       newCheckOutDate.setDate(checkInDate.getDate() + nightsDiff);
+      const checkOutString = dateToISOString(newCheckOutDate);
 
       const updatedBookingData = {
         ...bookingData,
-        checkIn: selectedDate,
-        checkOut: newCheckOutDate.toISOString().split("T")[0],
+        checkIn: checkInString,
+        checkOut: checkOutString,
       };
 
       setBookingData(updatedBookingData);
@@ -210,6 +224,7 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
         precioPorNoche: pricePerNight,
         noches: newNights,
         precioTotal: newTotal,
+        diasDisponibles: availabilityResponse.alternativeDates || [], // Agregar fechas alternativas del backend
       };
 
       setAvailabilityData(mockData);

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent } from "../../components/ui/Card";
-import DestinationSelect from "../../components/search/DestinationSelect.jsx";
 import RoomTypeSelect from "../../components/search/RoomTypeSelect.jsx";
 import GuestsSelect from "../../components/search/GuestsSelect.jsx";
 import DateRangePicker from "../../components/search/DateRangePicker.jsx";
@@ -13,7 +12,7 @@ import LoginRequiredModal from "../auth/LoginRequiredModal";
 import { useAuth } from "../../context/AuthContext";
 import { useRooms } from "../../context/RoomsContext";
 import { toast } from "react-hot-toast";
-import { checkAvailability } from "../../services/reserva";
+import { checkAvailability, createReservation } from "../../services/reserva";
 
 export default function SearchFilters() {
   const navigate = useNavigate();
@@ -21,9 +20,8 @@ export default function SearchFilters() {
   const { rooms } = useRooms();
 
   const [filters, setFilters] = useState({
-    destino: "",
     habitacion: "",
-    huespedes: "",
+    huespedes: "2 Adultos",
     checkIn: new Date().toISOString().split("T")[0],
     checkOut: (() => {
       const d = new Date();
@@ -39,9 +37,27 @@ export default function SearchFilters() {
   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
     useState(false);
   const [selectedRoomPrice, setSelectedRoomPrice] = useState(0);
+  const [disabledDates, setDisabledDates] = useState([]);
 
   const handleChange = (field, value) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Obtener fechas ocupadas cuando cambia la habitación seleccionada
+  const fetchDisabledDates = async (roomId) => {
+    try {
+      console.log(`Obteniendo fechas ocupadas para habitación: ${roomId}`);
+      // Consultar fechas ocupadas sin requerir autenticación
+      const response = await axios.get(
+        `/api/reservas/rooms/${roomId}/occupied-dates`,
+      );
+
+      console.log(`Fechas ocupadas recibidas:`, response.data.occupiedDates);
+      setDisabledDates(response.data.occupiedDates || []);
+    } catch (error) {
+      console.error("Error obteniendo fechas ocupadas:", error);
+      // No lanzar error, permitir que el usuario intente buscar de todas formas
+    }
   };
 
   // Función para obtener el precio de la habitación seleccionada
@@ -53,8 +69,15 @@ export default function SearchFilters() {
   // Actualizar el precio cuando cambie la habitación seleccionada
   useEffect(() => {
     if (filters.habitacion) {
-      const price = getRoomPrice(filters.habitacion);
-      setSelectedRoomPrice(price);
+      console.log(`Habitación seleccionada: ${filters.habitacion}`);
+      const room = rooms.find((r) => r.name === filters.habitacion);
+      if (room) {
+        const price = getRoomPrice(filters.habitacion);
+        setSelectedRoomPrice(price);
+        // Obtener fechas ocupadas para esta habitación
+        console.log(`Llamando fetchDisabledDates con roomId: ${room._id}`);
+        fetchDisabledDates(room._id);
+      }
     }
   }, [filters.habitacion, rooms]);
 
@@ -67,39 +90,35 @@ export default function SearchFilters() {
 
     setIsLoading(true);
     try {
-      // reemplaza con tu endpoint
-      //const response = await axios.post('http://localhost:5173/api/reserva', filters);
+      const room = rooms.find((r) => r.name === filters.habitacion);
+      if (!room) throw new Error("Habitación no encontrada");
 
-      // Procesar la respuesta y calcular información adicional
+      const availability = await checkAvailability(
+        room._id,
+        filters.checkIn,
+        filters.checkOut,
+      );
+
+      const precioPorNoche = availability?.precioPorNoche || room.price || 150;
+
       const processedData = {
         ...filters,
-        ...response.data,
+        disponible: availability?.disponible ?? true,
+        precioPorNoche,
         noches: calculateNights(filters.checkIn, filters.checkOut),
         precioTotal:
-          response.data.precioPorNoche *
-          calculateNights(filters.checkIn, filters.checkOut),
+          precioPorNoche * calculateNights(filters.checkIn, filters.checkOut),
+        diasDisponibles:
+          availability?.diasDisponibles ||
+          generateAvailableDates(filters.checkIn, filters.checkOut),
+        room,
       };
 
       setAvailabilityData(processedData);
       setIsModalOpen(true);
     } catch (error) {
       console.error("Error en la búsqueda:", error);
-      // En caso de error, mostrar datos de ejemplo para demostración
-      const precioPorNoche = getRoomPrice(filters.habitacion);
-      const mockData = {
-        ...filters,
-        disponible: Math.random() > 0.5, // Simular disponibilidad aleatoria
-        precioPorNoche: precioPorNoche,
-        noches: calculateNights(filters.checkIn, filters.checkOut),
-        precioTotal:
-          precioPorNoche * calculateNights(filters.checkIn, filters.checkOut),
-        diasDisponibles: generateAvailableDates(
-          filters.checkIn,
-          filters.checkOut,
-        ),
-      };
-      setAvailabilityData(mockData);
-      setIsModalOpen(true);
+      toast.error("No se pudo verificar disponibilidad");
     } finally {
       setIsLoading(false);
     }
@@ -154,16 +173,18 @@ export default function SearchFilters() {
     }
 
     try {
-      console.log("Confirmando reserva:", data);
-      // Ejemplo: await axios.post('http://localhost:5000/api/reservas', data);
+      const payload = {
+        habitacion: data.room?.name || data.habitacion,
+        destino: data.destino,
+        huespedes: data.huespedes,
+        checkIn: data.checkIn,
+        checkOut: data.checkOut,
+        precioPorNoche: data.precioPorNoche || selectedRoomPrice,
+      };
 
-      // Simular un pequeño delay para mostrar el proceso
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Guardar los datos de la reserva confirmada y mostrar el modal de éxito
-      setConfirmedReservation(data);
+      const created = await createReservation(payload);
+      setConfirmedReservation(created);
       setIsSuccessModalOpen(true);
-      // Cerrar el modal de disponibilidad
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error al confirmar la reserva:", error);
@@ -242,17 +263,11 @@ export default function SearchFilters() {
 
   return (
     <>
-      <Card className="max-w-6xl mx-auto shadow-lg">
-        <CardContent className="p-4 md:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 lg:gap-6 items-end">
-            <div className="md:col-span-2">
-              <DestinationSelect
-                value={filters.destino}
-                onChange={(v) => handleChange("destino", v)}
-              />
-            </div>
-
-            <div className="md:col-span-2">
+      <Card className="max-w-6xl mx-auto shadow-lg border-0">
+        <CardContent className="p-6 md:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            {/* Tipo de Habitación */}
+            <div className="md:col-span-3">
               <RoomTypeSelect
                 value={filters.habitacion}
                 onChange={(v) => handleChange("habitacion", v)}
@@ -260,6 +275,7 @@ export default function SearchFilters() {
               />
             </div>
 
+            {/* Huéspedes */}
             <div className="md:col-span-2">
               <GuestsSelect
                 value={filters.huespedes}
@@ -267,18 +283,21 @@ export default function SearchFilters() {
               />
             </div>
 
-            <div className="md:col-span-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Fechas */}
+            <div className="md:col-span-3">
               <DateRangePicker
                 checkIn={filters.checkIn}
                 checkOut={filters.checkOut}
                 onChange={handleChange}
+                disabledDates={disabledDates}
               />
             </div>
 
-            <div className="mt-2 md:mt-0 flex md:col-span-2 md:justify-start self-end">
+            {/* Botón Buscar */}
+            <div className="md:col-span-3 flex">
               <Button
-                size="md"
-                className={`w-full md:w-full ${!filters.habitacion ? "opacity-50 cursor-not-allowed" : ""}`}
+                size="lg"
+                className="w-full"
                 onClick={handleSearch}
                 disabled={isLoading || !filters.habitacion}
               >

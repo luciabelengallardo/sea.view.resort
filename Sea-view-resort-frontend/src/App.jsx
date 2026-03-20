@@ -27,6 +27,13 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" />;
 }
 
+function AdminRoute({ children }) {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" />;
+  if (user.role !== "admin") return <Navigate to="/" />;
+  return children;
+}
+
 export default function App() {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -40,8 +47,8 @@ export default function App() {
     "/register",
   ];
 
-  const isChatbotHidden = chatbotHiddenRoutes.some(route =>
-    location.pathname.startsWith(route)
+  const isChatbotHidden = chatbotHiddenRoutes.some((route) =>
+    location.pathname.startsWith(route),
   );
 
   if (loading) {
@@ -67,45 +74,59 @@ export default function App() {
           <Route path="explore" element={<Explore />} />
           <Route path="rooms" element={<Rooms />} />
           <Route path="rooms/:id" element={<RoomDetail />} />
-          <Route path="reservas" element={<ProtectedRoute><Reservations /></ProtectedRoute>} />
+          <Route
+            path="reservas"
+            element={
+              <ProtectedRoute>
+                <Reservations />
+              </ProtectedRoute>
+            }
+          />
           <Route path="about" element={<About />} />
           <Route path="contact" element={<Contact />} />
           <Route path="optimize" element={<ImageOptimizer />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* Admin Routes without MainLayout */}
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <Administrador />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/admin/rooms"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AdminRooms />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/admin/manage-users"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <ManageUsers />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/admin/reservations"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AdminDashboard />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
       </Routes>

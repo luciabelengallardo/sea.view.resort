@@ -29,8 +29,8 @@ export const createReservation = async (reservationData) => {
       throw new Error("Habitación no encontrada");
     }
 
-    const response = await fetchApi("/api/reserva", {
-      //  Cambiar de 'reservas' a 'reserva'
+    const response = await fetchApi("/api/reservas", {
+      // POST a /api/reservas (ruta del backend)
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -39,8 +39,9 @@ export const createReservation = async (reservationData) => {
         roomId: room._id,
         destino: reservationData.destino,
         huespedes: parseInt(reservationData.huespedes),
-        checkIn: reservationData.checkIn,
-        checkOut: reservationData.checkOut,
+        // Agregar T00:00:00Z para asegurar UTC
+        checkIn: reservationData.checkIn + "T00:00:00Z",
+        checkOut: reservationData.checkOut + "T00:00:00Z",
         precioPorNoche: reservationData.precioPorNoche,
       }),
     });
@@ -84,7 +85,7 @@ export const getReservations = async () => {
 export const checkAvailability = async (roomId, checkIn, checkOut) => {
   try {
     const response = await fetchApi(
-      `/api/rooms/${roomId}/disponibilidad?checkIn=${checkIn}&checkOut=${checkOut}`,
+      `/api/reservas/rooms/${roomId}/disponibilidad?checkIn=${checkIn}&checkOut=${checkOut}`,
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

@@ -31,12 +31,26 @@ export default function UserMenu() {
     navigate("/login");
   };
 
-  const avatarContent = user ? getInitials(user.username || user.email || "") : "";
+  const handleProfile = () => {
+    setOpen(false);
+    navigate("/profile");
+  };
+
+  const handleAdmin = () => {
+    setOpen(false);
+    navigate("/admin");
+  };
+
+  const avatarContent = user
+    ? getInitials(user.username || user.email || "")
+    : "";
 
   return (
     <div className="relative" ref={menuRef}>
       <button
-        aria-label={user ? "Abrir menú de usuario" : "Abrir menú de inicio de sesión"}
+        aria-label={
+          user ? "Abrir menú de usuario" : "Abrir menú de inicio de sesión"
+        }
         onClick={() => setOpen((v) => !v)}
         className="h-10 w-10 rounded-full bg-white border border-gray-300 text-gray-700 flex items-center justify-center select-none hover:border-resort-olive hover:text-resort-olive transition-colors"
       >
@@ -57,6 +71,20 @@ export default function UserMenu() {
                 Bienvenido, <span className="font-medium">{user.username}</span>
               </div>
               <button
+                onClick={handleProfile}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              >
+                Mi Perfil
+              </button>
+              {user.role === "admin" && (
+                <button
+                  onClick={handleAdmin}
+                  className="w-full text-left px-4 py-2 text-sm font-medium text-resort-olive hover:bg-gray-100"
+                >
+                  Panel Admin
+                </button>
+              )}
+              <button
                 onClick={handleLogout}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
@@ -76,5 +104,3 @@ export default function UserMenu() {
     </div>
   );
 }
-
-

@@ -28,24 +28,37 @@ function Login() {
         navigate("/");
       }
     } catch (err) {
-      const messages = err.response?.data?.err;
-      if (Array.isArray(messages)) {
-        messages.forEach((msg) =>
-          toast.error(msg, {
-            iconTheme: {
-              primary: "#968260",
-              secondary: "#fff",
-            },
-          })
-        );
-      } else {
-        toast.error(messages || "Error al iniciar sesion", {
-          iconTheme: {
-            primary: "#968260",
-            secondary: "#fff",
-          },
-        });
+      console.error("Login error:", err);
+
+      let errorMsg = "Error al iniciar sesión";
+
+      if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      } else if (err.response?.data?.err) {
+        const messages = err.response.data.err;
+        if (Array.isArray(messages)) {
+          messages.forEach((msg) =>
+            toast.error(msg, {
+              iconTheme: {
+                primary: "#968260",
+                secondary: "#fff",
+              },
+            }),
+          );
+          return;
+        } else {
+          errorMsg = messages;
+        }
+      } else if (err.message) {
+        errorMsg = err.message;
       }
+
+      toast.error(errorMsg, {
+        iconTheme: {
+          primary: "#968260",
+          secondary: "#fff",
+        },
+      });
     }
   };
 
@@ -57,7 +70,9 @@ function Login() {
       >
         <div className="h-full w-full bg-black/20 flex items-end p-8 text-white">
           <div>
-            <h3 className="text-2xl font-semibold">Bienvenido a Sea View Resort</h3>
+            <h3 className="text-2xl font-semibold">
+              Bienvenido a Sea View Resort
+            </h3>
             <ul className="mt-3 space-y-1 text-sm text-white/90">
               <li>• Acceso seguro</li>
               <li>• Administra tus reservas</li>
@@ -90,7 +105,9 @@ function Login() {
               <span className="sr-only">Inicio de sesión</span>
             </div>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">Iniciar sesión</h2>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+            Iniciar sesión
+          </h2>
 
           {error && <div className="text-yellow-500 text-sm mb-2">{error}</div>}
 
@@ -132,7 +149,9 @@ function Login() {
             </label>
           </div>
 
-          <Button type="submit" className="w-full mb-4">Entrar</Button>
+          <Button type="submit" className="w-full mb-4">
+            Entrar
+          </Button>
 
           <div className="text-center text-sm space-y-2">
             <p>

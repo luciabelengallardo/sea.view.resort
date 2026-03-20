@@ -13,6 +13,7 @@ export const createRoom = async (req, res) => {
   try {
     const newRoom = new Room({
       name: req.body.name,
+      type: req.body.type || req.body.name,
       price: req.body.price,
       description: req.body.description,
       images: [],

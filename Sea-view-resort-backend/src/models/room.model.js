@@ -7,6 +7,13 @@ const roomSchema = new mongoose.Schema(
       required: true,
       maxlength: [25, "El nombre no puede superar los 25 caracteres"],
     },
+    type: {
+      type: String,
+      // por defecto usamos el nombre como tipo para mantener compatibilidad
+      default: function () {
+        return this.name;
+      },
+    },
     price: {
       type: Number,
       required: true,
@@ -21,7 +28,7 @@ const roomSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model("Room", roomSchema);

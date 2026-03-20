@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/Card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/Card";
 import { Separator } from "../ui/separator";
 import { Calendar, Users, DollarSign, Trash2 } from "lucide-react";
 import { Button } from "../ui/Button";
@@ -13,6 +19,13 @@ export function ReservationsList({ userId }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const calculateNights = (checkIn, checkOut) => {
+    const start = new Date(checkIn);
+    const end = new Date(checkOut);
+    const diffTime = Math.abs(end - start);
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
   useEffect(() => {
     const fetchReservations = async () => {
       try {
@@ -22,7 +35,9 @@ export function ReservationsList({ userId }) {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        setReservations(response.data.datos || response.data || []);
+        const reservationsData = response.data.datos || response.data || [];
+        console.log("Reservas recibidas:", reservationsData);
+        setReservations(reservationsData);
         setError(null);
       } catch (err) {
         console.error("Error fetching reservations:", err);
@@ -47,7 +62,7 @@ export function ReservationsList({ userId }) {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
-      setReservations(reservations.filter(r => r._id !== reservationId));
+      setReservations(reservations.filter((r) => r._id !== reservationId));
       toast.success("Reserva cancelada exitosamente");
     } catch (err) {
       console.error("Error canceling reservation:", err);
@@ -113,10 +128,19 @@ export function ReservationsList({ userId }) {
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <Calendar className="size-4" />
-                        Fechas
+                        Desde
                       </p>
                       <p className="text-sm">
-                        {formatDate(reservation.checkIn)} a{" "}
+                        {formatDate(reservation.checkIn)}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Calendar className="size-4" />
+                        Hasta
+                      </p>
+                      <p className="text-sm">
                         {formatDate(reservation.checkOut)}
                       </p>
                     </div>
@@ -126,7 +150,9 @@ export function ReservationsList({ userId }) {
                         <Users className="size-4" />
                         Habitación
                       </p>
-                      <p className="text-sm">{reservation.roomId?.name || "Habitación"}</p>
+                      <p className="text-sm">
+                        {reservation.roomId?.name || "Habitación"}
+                      </p>
                     </div>
 
                     <div className="space-y-1">
@@ -134,7 +160,9 @@ export function ReservationsList({ userId }) {
                         <Users className="size-4" />
                         Huéspedes
                       </p>
-                      <p className="text-sm">{reservation.huespedes || "-"} personas</p>
+                      <p className="text-sm">
+                        {reservation.huespedes || "-"} personas
+                      </p>
                     </div>
 
                     <div className="space-y-1">
@@ -143,7 +171,18 @@ export function ReservationsList({ userId }) {
                         Total
                       </p>
                       <p className="text-sm font-semibold text-green-600">
-                        {formatPrice(reservation.total || reservation.precioPorNoche)}
+                        {(() => {
+                          const total =
+                            reservation.total ||
+                            (reservation.precioPorNoche
+                              ? reservation.precioPorNoche *
+                                calculateNights(
+                                  reservation.checkIn,
+                                  reservation.checkOut,
+                                )
+                              : null);
+                          return total ? `$${total.toFixed(2)}` : "N/A";
+                        })()}
                       </p>
                     </div>
                   </div>
@@ -157,7 +196,11 @@ export function ReservationsList({ userId }) {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => handleCancelReservation(reservation._id || reservation.id)}
+                      onClick={() =>
+                        handleCancelReservation(
+                          reservation._id || reservation.id,
+                        )
+                      }
                       className="flex items-center gap-2"
                     >
                       <Trash2 className="size-4" />

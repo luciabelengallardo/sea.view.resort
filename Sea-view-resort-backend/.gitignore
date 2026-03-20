@@ -4,3 +4,5 @@ generateAdminToken.js
 .vscode
 tempPasswordReset.routes.js
 testUser.js
+*.log
+server.log

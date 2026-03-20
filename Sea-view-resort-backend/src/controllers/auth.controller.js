@@ -52,16 +52,25 @@ export const register = async (req, res) => {
 
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
-      sameSite: process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax"),
+      secure:
+        process.env.COOKIE_SECURE === "true" ||
+        process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.COOKIE_SAMESITE ||
+        (process.env.NODE_ENV === "production" ? "none" : "lax"),
     };
 
     res.cookie("token", token, cookieOptions);
 
     res.status(201).json({
       id: savedUser._id,
-
+      username: savedUser.username,
       email: savedUser.email,
+      firstName: savedUser.firstName,
+      lastName: savedUser.lastName,
+      phone: savedUser.phone,
+      bio: savedUser.bio,
+      profileImage: savedUser.profileImage,
       isVerified: savedUser.isVerified,
       role: savedUser.role,
       token,
@@ -102,16 +111,25 @@ export const login = async (req, res) => {
 
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
-      sameSite: process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax"),
+      secure:
+        process.env.COOKIE_SECURE === "true" ||
+        process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.COOKIE_SAMESITE ||
+        (process.env.NODE_ENV === "production" ? "none" : "lax"),
     };
 
     res.cookie("token", token, cookieOptions);
 
     res.status(200).json({
       id: userMatch._id,
-
+      username: userMatch.username,
       email: userMatch.email,
+      firstName: userMatch.firstName,
+      lastName: userMatch.lastName,
+      phone: userMatch.phone,
+      bio: userMatch.bio,
+      profileImage: userMatch.profileImage,
       isVerified: userMatch.isVerified,
       role: userMatch.role,
       token,
@@ -126,8 +144,12 @@ export const logout = async (req, res) => {
   try {
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
-      sameSite: process.env.COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "none" : "lax"),
+      secure:
+        process.env.COOKIE_SECURE === "true" ||
+        process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.COOKIE_SAMESITE ||
+        (process.env.NODE_ENV === "production" ? "none" : "lax"),
       expires: new Date(0),
     };
 
@@ -149,8 +171,12 @@ export const profile = async (req, res) => {
 
     return res.status(200).json({
       id: userMatch.id,
-
+      username: userMatch.username,
       email: userMatch.email,
+      firstName: userMatch.firstName,
+      lastName: userMatch.lastName,
+      phone: userMatch.phone,
+      bio: userMatch.bio,
       profileImage: userMatch.profileImage,
       createdAt: userMatch.createdAt,
       updatedAt: userMatch.updatedAt,
