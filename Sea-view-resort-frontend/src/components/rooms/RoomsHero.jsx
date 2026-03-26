@@ -1,19 +1,19 @@
-import { ChevronDown } from 'lucide-react';
-import Hero from '../hero/Hero';
-import { Button } from '../ui/Button';
+import { ChevronDown } from "lucide-react";
+import Hero from "../hero/Hero";
+import { Button } from "../ui/Button";
 
 export default function RoomsHero() {
   const handleScrollDown = () => {
-    const target = document.getElementById('rooms-grid');
+    const target = document.getElementById("rooms-grid");
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
-    window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+    window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
   };
   return (
     <Hero
-      backgroundVideo="https://res.cloudinary.com/dokpk3c2l/video/upload/v1755707266/20250820_125556_0002_usdnsf.mp4"
+      backgroundVideo="https://res.cloudinary.com/dokpk3c2l/video/upload/f_auto/v1755707266/20250820_125556_0002_usdnsf.mp4"
       overlay="bg-black/40"
       title="Habitaciones y Suites"
       subtitle="Habitaciones elegantes con diseño cuidado y todo lo necesario para una estadía perfecta."
@@ -32,5 +32,3 @@ export default function RoomsHero() {
     </Hero>
   );
 }
-
-
