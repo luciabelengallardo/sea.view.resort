@@ -57,10 +57,26 @@ export default function Reservations() {
     if (!form.roomId) return setError("Seleccione una habitación");
     if (!form.checkIn || !form.checkOut)
       return setError("Seleccione fechas de entrada y salida");
+
+    // Validar fechas no sean pasadas
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInDate = new Date(form.checkIn);
+    checkInDate.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today)
+      return setError("No se pueden reservar fechas pasadas");
+
     if (new Date(form.checkOut) <= new Date(form.checkIn))
       return setError("La fecha de salida debe ser posterior a la de entrada");
     if (!Number.isInteger(Number(form.huespedes)) || Number(form.huespedes) < 1)
       return setError("Cantidad de huéspedes inválida");
+
+    // Validar máximo de huéspedes
+    const selectedRoom = rooms.find((r) => r._id === form.roomId);
+    const maxGuests = selectedRoom?.maxGuests || 4;
+    if (Number(form.huespedes) > maxGuests)
+      return setError(`Esta habitación admite máximo ${maxGuests} huéspedes`);
 
     // Check availability via API
     try {

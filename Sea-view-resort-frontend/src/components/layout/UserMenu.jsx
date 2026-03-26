@@ -41,9 +41,7 @@ export default function UserMenu() {
     navigate("/admin");
   };
 
-  const avatarContent = user
-    ? getInitials(user.username || user.email || "")
-    : "";
+  const avatarContent = user ? getInitials(user.email || "") : "";
 
   return (
     <div className="relative" ref={menuRef}>
@@ -67,14 +65,15 @@ export default function UserMenu() {
         <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-md rounded-md py-2 z-50">
           {user ? (
             <>
-              <div className="px-4 py-2 text-sm text-gray-700">
-                Bienvenido, <span className="font-medium">{user.username}</span>
+              <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
+                <p className="font-medium truncate">{user.username}</p>
+                <p className="text-xs text-gray-500 truncate">{user.email}</p>
               </div>
               <button
                 onClick={handleProfile}
                 className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
-                Mi Perfil
+                Mis Reservas
               </button>
               {user.role === "admin" && (
                 <button

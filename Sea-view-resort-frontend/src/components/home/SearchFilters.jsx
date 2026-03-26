@@ -22,6 +22,7 @@ export default function SearchFilters() {
   const [filters, setFilters] = useState({
     habitacion: "",
     huespedes: "2 Adultos",
+    destino: "playa", // Agregar destino por defecto
     checkIn: new Date().toISOString().split("T")[0],
     checkOut: (() => {
       const d = new Date();
@@ -46,13 +47,11 @@ export default function SearchFilters() {
   // Obtener fechas ocupadas cuando cambia la habitación seleccionada
   const fetchDisabledDates = async (roomId) => {
     try {
-      console.log(`Obteniendo fechas ocupadas para habitación: ${roomId}`);
       // Consultar fechas ocupadas sin requerir autenticación
       const response = await axios.get(
         `/api/reservas/rooms/${roomId}/occupied-dates`,
       );
 
-      console.log(`Fechas ocupadas recibidas:`, response.data.occupiedDates);
       setDisabledDates(response.data.occupiedDates || []);
     } catch (error) {
       console.error("Error obteniendo fechas ocupadas:", error);
@@ -69,13 +68,11 @@ export default function SearchFilters() {
   // Actualizar el precio cuando cambie la habitación seleccionada
   useEffect(() => {
     if (filters.habitacion) {
-      console.log(`Habitación seleccionada: ${filters.habitacion}`);
       const room = rooms.find((r) => r.name === filters.habitacion);
       if (room) {
         const price = getRoomPrice(filters.habitacion);
         setSelectedRoomPrice(price);
         // Obtener fechas ocupadas para esta habitación
-        console.log(`Llamando fetchDisabledDates con roomId: ${room._id}`);
         fetchDisabledDates(room._id);
       }
     }
@@ -85,6 +82,17 @@ export default function SearchFilters() {
     // Validar que se haya seleccionado una habitación
     if (!filters.habitacion) {
       alert("Por favor selecciona una habitación antes de buscar");
+      return;
+    }
+
+    // Validar fechas no sean pasadas
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInDate = new Date(filters.checkIn);
+    checkInDate.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      toast.error("No se pueden reservar fechas pasadas");
       return;
     }
 
@@ -263,8 +271,8 @@ export default function SearchFilters() {
 
   return (
     <>
-      <Card className="max-w-6xl mx-auto shadow-lg border-0">
-        <CardContent className="p-6 md:p-8">
+      <Card className="max-w-6xl mx-auto shadow-lg border-0 relative z-10">
+        <CardContent className="p-6 md:p-8 overflow-visible">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
             {/* Tipo de Habitación */}
             <div className="md:col-span-3">

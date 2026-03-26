@@ -38,7 +38,7 @@ export default function ManageUsers() {
   const getUsers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(apiUrl("/api/v1/users"), {
+      const res = await axios.get(apiUrl("/api/auth/users"), {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       setUsers(res.data);
@@ -72,13 +72,14 @@ export default function ManageUsers() {
 
   const deleteUser = async (id) => {
     try {
-      await axios.delete(apiUrl(`/api/v1/users/${id}`), {
+      await axios.delete(apiUrl(`/api/auth/users/${id}`), {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
       setUsers(users.filter((e) => e._id !== id));
+      toast.success("Usuario eliminado exitosamente");
     } catch (err) {
-      console.log(error);
-      toast.error("Error al eliminar el usuario");
+      console.error(err);
+      toast.error("Error al eliminar usuario");
     }
   };
 
@@ -91,7 +92,6 @@ export default function ManageUsers() {
   const handleEditUser = (user) => {
     setEditingUser(user);
     setFormData({
-      username: user.username,
       email: user.email,
       role: user.role,
     });
@@ -106,15 +106,15 @@ export default function ManageUsers() {
     e.preventDefault();
     try {
       const res = await axios.put(
-        apiUrl(`/api/v1/users/${editingUser._id}`),
+        apiUrl(`/api/auth/users/${editingUser._id}`),
         formData,
         {
           headers: { Authorization: `Bearer ${getToken()}` },
-        }
+        },
       );
 
       setUsers(
-        users.map((e) => (e._id === editingUser._id ? res.data.user : e))
+        users.map((e) => (e._id === editingUser._id ? res.data.user : e)),
       );
       setEditingUser(null);
       toast.success("Usuario actualizado correctamente");
@@ -236,20 +236,15 @@ export default function ManageUsers() {
                 </thead>
                 <tbody>
                   {filteredUsers.map((user) => {
-                    const initials = initialsFor(user.username);
                     return (
                       <tr key={user._id} className="border-b hover:bg-gray-50">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-semibold text-sm">
-                              {initials ||
-                                user.username?.charAt(0).toUpperCase()}
+                              {user.email?.charAt(0).toUpperCase()}
                             </div>
-                            <p className="font-medium">{user.username}</p>
+                            <p className="font-medium">{user.email}</p>
                           </div>
-                        </td>
-                        <td className="p-4">
-                          <p className="text-sm text-gray-600">{user.email}</p>
                         </td>
                         <td className="p-4">
                           <span

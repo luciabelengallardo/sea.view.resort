@@ -36,7 +36,6 @@ export function ReservationsList({ userId }) {
           },
         });
         const reservationsData = response.data.datos || response.data || [];
-        console.log("Reservas recibidas:", reservationsData);
         setReservations(reservationsData);
         setError(null);
       } catch (err) {
@@ -52,22 +51,67 @@ export function ReservationsList({ userId }) {
   }, [userId]);
 
   const handleCancelReservation = async (reservationId) => {
-    if (!window.confirm("¿Estás seguro de que deseas cancelar esta reserva?")) {
-      return;
-    }
-
-    try {
-      await axios.delete(apiUrl(`/api/reservas/${reservationId}`), {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setReservations(reservations.filter((r) => r._id !== reservationId));
-      toast.success("Reserva cancelada exitosamente");
-    } catch (err) {
-      console.error("Error canceling reservation:", err);
-      toast.error("Error al cancelar la reserva");
-    }
+    toast.custom(
+      (t) => (
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6 max-w-md">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                Cancelar Reserva
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                ¿Estás seguro de que deseas cancelar esta reserva? Esta acción
+                no se puede deshacer.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={async () => {
+                    toast.dismiss(t.id);
+                    try {
+                      await axios.delete(
+                        apiUrl(`/api/reservas/${reservationId}`),
+                        {
+                          headers: {
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                          },
+                        },
+                      );
+                      setReservations(
+                        reservations.filter((r) => r._id !== reservationId),
+                      );
+                      toast.success("Reserva cancelada exitosamente");
+                    } catch (err) {
+                      console.error("Error canceling reservation:", err);
+                      toast.error("Error al cancelar la reserva");
+                    }
+                  }}
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  size="sm"
+                >
+                  Cancelar reserva
+                </Button>
+                <Button
+                  onClick={() => toast.dismiss(t.id)}
+                  variant="outline"
+                  size="sm"
+                >
+                  Mantener
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      {
+        duration: 10000,
+        position: "top-center",
+      },
+    );
   };
 
   if (isLoading) {
@@ -182,6 +226,42 @@ export function ReservationsList({ userId }) {
                                 )
                               : null);
                           return total ? `$${total.toFixed(2)}` : "N/A";
+                        })()}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-muted-foreground">
+                        Estado
+                      </p>
+                      <p className="text-sm">
+                        {(() => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          const checkIn = new Date(reservation.checkIn);
+                          checkIn.setHours(0, 0, 0, 0);
+                          const checkOut = new Date(reservation.checkOut);
+                          checkOut.setHours(0, 0, 0, 0);
+
+                          if (checkOut < today) {
+                            return (
+                              <span className="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-700">
+                                Pasada
+                              </span>
+                            );
+                          } else if (checkIn <= today && checkOut >= today) {
+                            return (
+                              <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
+                                Activa
+                              </span>
+                            );
+                          } else {
+                            return (
+                              <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-700">
+                                Próxima
+                              </span>
+                            );
+                          }
                         })()}
                       </p>
                     </div>

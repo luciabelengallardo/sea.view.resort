@@ -7,7 +7,11 @@ import { toast } from "react-hot-toast";
 import beachImg from "../assets/AreasComunes/Pileta-Playa/pexels-gapeppy1-2373201.jpg";
 
 function Register() {
-  const [data, setData] = useState({ username: "", email: "", password: "" });
+  const [data, setData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -17,12 +21,49 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validar que las contraseñas coincidan
+    if (data.password !== data.confirmPassword) {
+      toast.error("Las contraseñas no coinciden", {
+        iconTheme: {
+          primary: "#968260",
+          secondary: "#fff",
+        },
+      });
+      return;
+    }
+
     try {
-      await register(data);
+      // Enviar solo email y password al backend
+      await register({ email: data.email, password: data.password });
       toast.success("Gracias por registrarte. Revisa tu email.");
       navigate("/login");
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Error al registrarse";
+      console.error("Register error:", err);
+
+      let errorMsg = "Error al registrarse";
+
+      if (err.response?.data?.error) {
+        // El backend devuelve error como array
+        const errors = err.response.data.error;
+        if (Array.isArray(errors)) {
+          errors.forEach((msg) =>
+            toast.error(msg, {
+              iconTheme: {
+                primary: "#968260",
+                secondary: "#fff",
+              },
+            }),
+          );
+          return;
+        } else {
+          errorMsg = errors;
+        }
+      } else if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      } else if (err.message) {
+        errorMsg = err.message;
+      }
 
       toast.error(errorMsg, {
         iconTheme: {
@@ -62,25 +103,9 @@ function Register() {
             </div>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">Crear cuenta</h2>
-
-          <div className="relative mb-6">
-            <input
-              id="username"
-              type="text"
-              name="username"
-              onChange={handleChange}
-              placeholder=" "
-              className="peer w-full border rounded px-3 py-3 bg-white focus:outline-none focus:border-resort-olive"
-              required
-            />
-            <label
-              htmlFor="username"
-              className="absolute left-3 -top-2.5 bg-white px-1 text-sm text-gray-600 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-resort-olive"
-            >
-              Usuario
-            </label>
-          </div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center">
+            Crear cuenta
+          </h2>
 
           <div className="relative mb-6">
             <input
@@ -109,6 +134,7 @@ function Register() {
               placeholder=" "
               className="peer w-full border rounded px-3 py-3 bg-white focus:outline-none focus:border-resort-olive"
               required
+              minLength="6"
             />
             <label
               htmlFor="password"
@@ -118,10 +144,34 @@ function Register() {
             </label>
           </div>
 
-          <Button type="submit" className="w-full mb-4">Registrarse</Button>
+          <div className="relative mb-6">
+            <input
+              id="confirmPassword"
+              type="password"
+              name="confirmPassword"
+              onChange={handleChange}
+              placeholder=" "
+              className="peer w-full border rounded px-3 py-3 bg-white focus:outline-none focus:border-resort-olive"
+              required
+              minLength="6"
+            />
+            <label
+              htmlFor="confirmPassword"
+              className="absolute left-3 -top-2.5 bg-white px-1 text-sm text-gray-600 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-resort-olive"
+            >
+              Confirmar Contraseña
+            </label>
+          </div>
+
+          <Button type="submit" className="w-full mb-4">
+            Registrarse
+          </Button>
           <p className="text-center text-sm">
             ¿Ya tienes una cuenta? {""}
-            <Link to="/login" className="text-[rgb(150,130,96)] hover:underline">
+            <Link
+              to="/login"
+              className="text-[rgb(150,130,96)] hover:underline"
+            >
               Inicia sesión
             </Link>
           </p>

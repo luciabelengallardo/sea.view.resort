@@ -67,11 +67,11 @@ export default function MobileMenu({ isOpen, onClose, user, logout }) {
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-white border border-gray-300 text-gray-700 flex items-center justify-center">
                   <span className="font-semibold text-sm uppercase">
-                    {getInitials(user.username || user.email || "")}
+                    {getInitials(user.email || "")}
                   </span>
                 </div>
                 <span className="text-gray-700 font-medium">
-                  Bienvenido, {user.username}
+                  Bienvenido, {user.email.split("@")[0]}
                 </span>
               </div>
               <Button

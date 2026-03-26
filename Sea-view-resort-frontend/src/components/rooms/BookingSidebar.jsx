@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { Card, CardContent } from "../ui/Card";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -15,26 +16,14 @@ import { toast } from "react-hot-toast";
 import AvailabilityModal from "../booking/AvailabilityModal";
 import SuccessModal from "../booking/SuccessModal";
 import LoginRequiredModal from "../auth/LoginRequiredModal";
-import { checkAvailability } from "../../services/reserva";
+import DateRangePicker from "../search/DateRangePicker";
+import { checkAvailability, createReservation } from "../../services/reserva";
 
-/**
- * Sidebar de reserva con cálculo de costos.
- *
- * Encapsula UI y lógica de cálculo del resumen.
- *
- * @component
- * @param {Object} props - Propiedades del componente.
- * @param {number} props.pricePerNight - Precio por noche de la habitación.
- * @param {string} props.roomName - Nombre de la habitación.
- * @param {string} props.roomId - ID de la habitación.
- * @returns {JSX.Element}
- */
 export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [bookingData, setBookingData] = useState({
-    destino: "",
     checkIn: new Date().toISOString().split("T")[0],
     checkOut: (() => {
       const d = new Date();
@@ -51,8 +40,9 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
   const [confirmedReservation, setConfirmedReservation] = useState(null);
   const [isLoginRequiredModalOpen, setIsLoginRequiredModalOpen] =
     useState(false);
+  const [disabledDates, setDisabledDates] = useState([]);
 
-  // Calcular noches
+  // calcular noches
   const calculateNights = (checkIn, checkOut) => {
     const start = new Date(checkIn);
     const end = new Date(checkOut);
@@ -61,10 +51,25 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
   };
 
   const nights = calculateNights(bookingData.checkIn, bookingData.checkOut);
-  const serviceFee = 25000;
-  const taxes = 30000;
-  const subtotal = pricePerNight * nights;
-  const total = subtotal + serviceFee + taxes;
+  const total = pricePerNight * nights;
+
+  // obtener fechas ocupadas al cargar el componente
+  useEffect(() => {
+    const fetchDisabledDates = async () => {
+      try {
+        const response = await axios.get(
+          `/api/reservas/rooms/${roomId}/occupied-dates`,
+        );
+        setDisabledDates(response.data.occupiedDates || []);
+      } catch (error) {
+        console.error("Error obteniendo fechas ocupadas:", error);
+      }
+    };
+
+    if (roomId) {
+      fetchDisabledDates();
+    }
+  }, [roomId]);
 
   const handleChange = (field, value) => {
     setBookingData((prev) => ({ ...prev, [field]: value }));
@@ -98,22 +103,27 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
   };
 
   const handleSearch = async () => {
-    if (!bookingData.destino) {
-      alert("Por favor selecciona un destino");
+    // validar fechas no sean pasadas
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInDate = new Date(bookingData.checkIn);
+    checkInDate.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      toast.error("No se pueden reservar fechas pasadas");
       return;
     }
 
     setIsLoading(true);
     try {
-      // Consultar disponibilidad en la API
+      // consultar disponibilidad en la API
       const availabilityResponse = await checkAvailability(
         roomId,
         bookingData.checkIn,
         bookingData.checkOut,
       );
 
-      // Procesar la respuesta
-      console.log("Respuesta de disponibilidad:", availabilityResponse);
+      // procesar la respuesta
       const mockData = {
         ...bookingData,
         habitacion: roomName,
@@ -123,9 +133,8 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
         precioPorNoche: pricePerNight,
         noches: nights,
         precioTotal: total,
-        diasDisponibles: availabilityResponse.alternativeDates || [], // Agregar fechas alternativas del backend
+        diasDisponibles: availabilityResponse.alternativeDates || [], // agregar fechas alternativas del backend
       };
-      console.log("Fechas disponibles:", diasDisponibles);
 
       setAvailabilityData(mockData);
       setIsModalOpen(true);
@@ -144,12 +153,22 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
     }
 
     try {
-      console.log("Confirmando reserva:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // crear la reserva en el backend
+      const payload = {
+        habitacion: data.habitacion || roomName,
+        destino: "Sea View Resort", // destino fijo ya que el usuario eligio la habitación
+        huespedes: data.huespedes,
+        checkIn: data.checkIn,
+        checkOut: data.checkOut,
+        precioPorNoche: data.precioPorNoche || pricePerNight,
+      };
 
-      setConfirmedReservation(data);
+      const created = await createReservation(payload);
+
+      setConfirmedReservation(created);
       setIsSuccessModalOpen(true);
       setIsModalOpen(false);
+      toast.success("¡Reserva confirmada exitosamente!");
     } catch (error) {
       console.error("Error al confirmar la reserva:", error);
       toast.error("Error al crear la reserva: " + error.message);
@@ -171,7 +190,6 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
 
   const handleSelectAlternativeDate = async (selectedDate) => {
     try {
-      // Convertir selectedDate a YYYY-MM-DD string
       const dateToISOString = (date) => {
         const d = new Date(date);
         const year = d.getFullYear();
@@ -201,7 +219,7 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
       setBookingData(updatedBookingData);
       setIsLoading(true);
 
-      // Consultar disponibilidad con las nuevas fechas
+      // consultar disponibilidad con las nuevas fechas
       const availabilityResponse = await checkAvailability(
         roomId,
         selectedDate,
@@ -224,7 +242,7 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
         precioPorNoche: pricePerNight,
         noches: newNights,
         precioTotal: newTotal,
-        diasDisponibles: availabilityResponse.alternativeDates || [], // Agregar fechas alternativas del backend
+        diasDisponibles: availabilityResponse.alternativeDates || [], // agregar fechas alternativas del backend
       };
 
       setAvailabilityData(mockData);
@@ -256,57 +274,17 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
           </div>
 
           <div className="space-y-4 mb-6">
-            {/* Campo de Destino */}
+            {/* fechas de check-in y check-out */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900">
-                Destino
-              </label>
-              <Select
-                value={bookingData.destino}
-                onValueChange={(v) => handleChange("destino", v)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccione un destino" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="maldivas">Maldivas</SelectItem>
-                  <SelectItem value="bali">Bali</SelectItem>
-                  <SelectItem value="hawai">Hawái</SelectItem>
-                </SelectContent>
-              </Select>
+              <DateRangePicker
+                checkIn={bookingData.checkIn}
+                checkOut={bookingData.checkOut}
+                onChange={handleChange}
+                disabledDates={disabledDates}
+              />
             </div>
 
-            {/* Fechas de Check-in y Check-out */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-900">
-                  Check-in
-                </label>
-                <Input
-                  type="date"
-                  value={bookingData.checkIn}
-                  min={new Date().toISOString().split("T")[0]}
-                  onChange={(e) => handleChange("checkIn", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-900">
-                  Check-out
-                </label>
-                <Input
-                  type="date"
-                  value={bookingData.checkOut}
-                  min={(() => {
-                    const d = new Date();
-                    d.setDate(d.getDate() + 1);
-                    return d.toISOString().split("T")[0];
-                  })()}
-                  onChange={(e) => handleChange("checkOut", e.target.value)}
-                />
-              </div>
-            </div>
-
-            {/* Campo de Huéspedes */}
+            {/* campo de huespedes */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-900">
                 Huéspedes
@@ -328,17 +306,10 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
           <div className="space-y-3 mb-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex justify-between text-sm text-gray-900">
               <span>
-                ${pricePerNight.toLocaleString()} × {nights} noches
+                ${pricePerNight.toLocaleString()} × {nights} noche
+                {nights !== 1 ? "s" : ""}
               </span>
-              <span>${subtotal.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-sm text-gray-900">
-              <span>Servicio</span>
-              <span>${serviceFee.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-sm text-gray-900">
-              <span>Impuestos</span>
-              <span>${taxes.toLocaleString()}</span>
+              <span>${total.toLocaleString()}</span>
             </div>
             <hr className="border-gray-200" />
             <div className="flex justify-between font-semibold text-gray-900">
@@ -348,16 +319,12 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
           </div>
 
           <Button
-            className={`w-full ${!bookingData.destino ? "opacity-50 cursor-not-allowed" : ""}`}
+            className="w-full"
             size="lg"
             onClick={handleSearch}
-            disabled={isLoading || !bookingData.destino}
+            disabled={isLoading}
           >
-            {isLoading
-              ? "Buscando..."
-              : !bookingData.destino
-                ? "Selecciona un destino"
-                : "Verificar disponibilidad"}
+            {isLoading ? "Buscando..." : "Verificar disponibilidad"}
           </Button>
           <p className="text-xs text-resort-slate text-center mt-4">
             Aún no se realizará ningún cargo
@@ -380,7 +347,7 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
         </CardContent>
       </Card>
 
-      {/* Modal de disponibilidad */}
+      {/* modal de disponibilidad */}
       <AvailabilityModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -391,14 +358,14 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
         user={user}
       />
 
-      {/* Modal de confirmación exitosa */}
+      {/* modal de confirmacion exitosa */}
       <SuccessModal
         isOpen={isSuccessModalOpen}
         onClose={() => setIsSuccessModalOpen(false)}
         reservationData={confirmedReservation}
       />
 
-      {/* Modal de login requerido */}
+      {/* modal de login requerido */}
       <LoginRequiredModal
         isOpen={isLoginRequiredModalOpen}
         onClose={() => setIsLoginRequiredModalOpen(false)}

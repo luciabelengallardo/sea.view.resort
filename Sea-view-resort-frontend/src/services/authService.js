@@ -28,7 +28,6 @@ export const login = async (data) => {
         id: res.data.id,
         username: res.data.username,
         email: res.data.email,
-        profileImage: res.data.profileImage,
       },
     };
   } catch (error) {

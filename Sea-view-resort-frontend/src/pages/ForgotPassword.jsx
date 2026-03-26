@@ -11,7 +11,6 @@ function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted with email:", email);
     setMessage(null);
     setError(null);
 
@@ -21,16 +20,13 @@ function ForgotPassword() {
     }
 
     try {
-      console.log("Calling API:", apiUrl(`/api/auth/password-reset-request`));
       const res = await fetch(apiUrl(`/api/auth/password-reset-request`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
-      console.log("Response status:", res.status);
       const data = await res.json();
-      console.log("Response data:", data);
 
       if (res.ok) {
         setMessage(data.message || "Email enviado");

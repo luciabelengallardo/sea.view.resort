@@ -3,37 +3,26 @@ import { Card } from "../ui/Card";
 import { Mail, MapPin, Calendar } from "lucide-react";
 import { formatMemberSince } from "../../lib/formatters";
 
-export function ProfileHeader({ user, profileImage }) {
+export function ProfileHeader({ user }) {
   return (
     <Card className="overflow-hidden">
-      <div className="h-32 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20" />
+      <div className="h-24 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20" />
 
       <div className="px-6 pb-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-            <Avatar className="-mt-16 size-32 border-4 border-card shadow-xl">
-              <AvatarImage src={profileImage} alt="Sea View" />
-              <AvatarFallback className="text-2xl">SV</AvatarFallback>
-            </Avatar>
+        <div className="flex items-end gap-6 -mt-16 mb-6">
+          <Avatar className="size-32 border-4 border-card shadow-xl ring-2 ring-white/10">
+            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary/30 to-accent/30">
+              {user?.email?.charAt(0).toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
 
-            <div className="space-y-1 pb-2">
-              <h1 className="text-3xl font-bold tracking-tight">
-                {user.username}
-              </h1>
-              <p className="text-muted-foreground">Resort Guest</p>
-            </div>
+          <div className="flex-1 pb-1">
+            <h1 className="text-3xl font-bold tracking-tight">{user.email}</h1>
+            <p className="text-muted-foreground mt-1">Huésped</p>
           </div>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <Mail className="size-4" />
-            <span>{user.email}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin className="size-4" />
-            <span>{user.location}</span>
-          </div>
           <div className="flex items-center gap-2">
             <Calendar className="size-4" />
             <span>Miembro desde {formatMemberSince(user.createdAt)}</span>

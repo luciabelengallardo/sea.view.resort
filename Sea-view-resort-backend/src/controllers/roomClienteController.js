@@ -2,13 +2,12 @@ import dayjs from "dayjs";
 import Reserva from "../models/Reserva.js";
 import { validarDisponibilidad } from "../validators/reserva.validator.js";
 
-// Obtener disponibilidad de una habitación
 export const getRoomDisponibilidad = async (req, res) => {
   try {
     const { checkIn, checkOut } = req.query;
     const roomId = req.params.id;
 
-    // Verificar si hay conflicto en las fechas solicitadas
+    // Buscar si hay reservas que se solapen con las fechas
     const reservas = await Reserva.find({
       roomId: roomId,
       checkIn: { $lt: checkOut },
@@ -22,63 +21,70 @@ export const getRoomDisponibilidad = async (req, res) => {
       return;
     }
 
-    // Si NO está disponible, calcular fechas alternativas
-    // Obtener todas las reservas para esta habitación en los próximos 90 días
-    const startDate = new Date(checkIn);
-    startDate.setHours(0, 0, 0, 0); // Normalizar a medianoche
+    // Buscar fechas alternativas en los próximos 90 días
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const requestedCheckIn = new Date(checkIn);
+    requestedCheckIn.setHours(0, 0, 0, 0);
+
+    // Empezar desde hoy o desde la fecha solicitada, lo que sea más tarde
+    const startDate = requestedCheckIn > today ? today : new Date(today);
 
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 90);
 
     const todasLasReservas = await Reserva.find({
       roomId: roomId,
-      checkOut: { $gt: checkIn },
+      checkOut: { $gt: today.toISOString() },
       checkIn: { $lt: endDate.toISOString() },
     });
 
-    // Calcular noches requeridas
-    const checkInDate = new Date(checkIn);
-    const checkOutDate = new Date(checkOut);
-    const nightsRequired = Math.ceil(
-      (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24),
-    );
-
-    // Generar fechas alternativas
+    // Ver qué días están libres
     const alternativeDates = [];
     let currentDate = new Date(startDate);
 
     while (currentDate < endDate) {
-      const potentialCheckOut = new Date(currentDate);
-      potentialCheckOut.setDate(potentialCheckOut.getDate() + nightsRequired);
+      const currentDateNormalized = new Date(currentDate);
+      currentDateNormalized.setHours(0, 0, 0, 0);
 
-      // Verificar si este rango está disponible
-      const conflicto = todasLasReservas.some((reserva) => {
-        const reservaCheckIn = new Date(reserva.checkIn);
-        const reservaCheckOut = new Date(reserva.checkOut);
-
-        // Hay conflicto si se solapan:
-        // currentDate < reservaCheckOut AND potentialCheckOut > reservaCheckIn
-        return (
-          currentDate < reservaCheckOut && potentialCheckOut > reservaCheckIn
+      // Ver si está ocupado
+      const estaOcupado = todasLasReservas.some((reserva) => {
+        // Parsear fechas de MongoDB
+        const reservaCheckInDate = new Date(reserva.checkIn);
+        const reservaCheckIn = new Date(
+          reservaCheckInDate.getUTCFullYear(),
+          reservaCheckInDate.getUTCMonth(),
+          reservaCheckInDate.getUTCDate(),
         );
+
+        const reservaCheckOutDate = new Date(reserva.checkOut);
+        const reservaCheckOut = new Date(
+          reservaCheckOutDate.getUTCFullYear(),
+          reservaCheckOutDate.getUTCMonth(),
+          reservaCheckOutDate.getUTCDate(),
+        );
+
+        const ocupado =
+          currentDateNormalized >= reservaCheckIn &&
+          currentDateNormalized < reservaCheckOut;
+        return ocupado;
       });
 
-      if (!conflicto) {
+      if (!estaOcupado) {
         alternativeDates.push(new Date(currentDate));
       }
 
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    console.log(
-      `Disponibilidad - Room: ${roomId}, Fechas solicitadas: ${checkIn} a ${checkOut}, Noches: ${nightsRequired}, Alternativas encontradas: ${alternativeDates.length}`,
-    );
-
     res.json({
       disponible: false,
-      alternativeDates: alternativeDates.map(
-        (d) => d.toISOString().split("T")[0],
-      ),
+      alternativeDates: alternativeDates.map((d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }),
     });
   } catch (err) {
     console.error("Error al verificar disponibilidad:", err);
@@ -86,14 +92,11 @@ export const getRoomDisponibilidad = async (req, res) => {
   }
 };
 
-// Obtener fechas ocupadas de una habitación (sin requerir autenticación)
 export const getOccupiedDates = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log(`Consultando fechas ocupadas para habitación: ${id}`);
-
-    // Obtener las 90 próximas reservas de esta habitación
+    // Traer reservas de los próximos 90 días
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -106,33 +109,39 @@ export const getOccupiedDates = async (req, res) => {
       checkIn: { $lt: in90Days },
     });
 
-    console.log(`Encontradas ${reservas.length} reservas para esta habitación`);
-
-    // Extraer todas las fechas ocupadas
     const occupiedDates = [];
     reservas.forEach((reserva) => {
-      const checkIn = new Date(reserva.checkIn);
-      checkIn.setHours(0, 0, 0, 0);
+      // Parsear fechas
+      const checkInDate = new Date(reserva.checkIn);
+      const checkIn = new Date(
+        checkInDate.getUTCFullYear(),
+        checkInDate.getUTCMonth(),
+        checkInDate.getUTCDate(),
+      );
 
-      const checkOut = new Date(reserva.checkOut);
-      checkOut.setHours(0, 0, 0, 0);
+      const checkOutDate = new Date(reserva.checkOut);
+      const checkOut = new Date(
+        checkOutDate.getUTCFullYear(),
+        checkOutDate.getUTCMonth(),
+        checkOutDate.getUTCDate(),
+      );
 
       for (
         let d = new Date(checkIn);
         d < checkOut;
         d.setDate(d.getDate() + 1)
       ) {
-        const dateStr = d.toISOString().split("T")[0];
+        // Formatear sin usar toISOString para evitar conversión a UTC
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        const dateStr = `${year}-${month}-${day}`;
+
         if (!occupiedDates.includes(dateStr)) {
           occupiedDates.push(dateStr);
         }
       }
     });
-
-    console.log(
-      `Fechas ocupadas totales: ${occupiedDates.length}`,
-      occupiedDates.slice(0, 5),
-    );
 
     res.json({ occupiedDates });
   } catch (err) {
@@ -141,7 +150,6 @@ export const getOccupiedDates = async (req, res) => {
   }
 };
 
-// Crear una reserva
 export const createReserva = async (req, res) => {
   try {
     let { roomId, checkIn, checkOut, destino, huespedes } = req.body;
@@ -149,12 +157,12 @@ export const createReserva = async (req, res) => {
     if (!userId)
       return res.status(401).json({ error: "Usuario no autenticado" });
 
-    // Convertir fechas en formato YYYY-MM-DD a Date correctamente en UTC
+    // Convertir fechas en formato YYYY-MM-DD a Date correctamente en timezone local
     const parseDate = (dateStr) => {
       const [year, month, day] = dateStr.split("-");
-      return new Date(
-        Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day), 0, 0, 0),
-      );
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      date.setHours(0, 0, 0, 0);
+      return date;
     };
 
     // Si las fechas son strings en formato YYYY-MM-DD, convertir correctamente
@@ -165,9 +173,23 @@ export const createReserva = async (req, res) => {
       checkOut = parseDate(checkOut);
     }
 
+    // Que no reserve en el pasado
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkInDate = new Date(checkIn);
+    checkInDate.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      return res
+        .status(400)
+        .json({ error: "No se pueden reservar fechas pasadas" });
+    }
+
     // Asegurar que checkOut sea posterior a checkIn
     if (!dayjs(checkOut).isAfter(checkIn)) {
-      return res.status(400).json({ error: "Fechas inválidas" });
+      return res.status(400).json({
+        error: "La fecha de salida debe ser posterior a la de entrada",
+      });
     }
 
     if (!Number.isInteger(huespedes) || huespedes < 1) {
@@ -181,7 +203,15 @@ export const createReserva = async (req, res) => {
       return res.status(400).json({ error: "Habitación no encontrada" });
     }
 
-    // Validar disponibilidad global por tipo y destino
+    // Validar que no exceda el máximo de huéspedes
+    const maxGuests = room.maxGuests || 4;
+    if (huespedes > maxGuests) {
+      return res.status(400).json({
+        error: `Esta habitación admite máximo ${maxGuests} huéspedes`,
+      });
+    }
+
+    // Ver si hay conflictos de fecha
     try {
       await validarDisponibilidad({ roomId, destino, checkIn, checkOut });
     } catch (err) {
@@ -202,7 +232,7 @@ export const createReserva = async (req, res) => {
       });
     }
 
-    // Calcular número de noches y usar precio de la habitación
+    // Calcular noches y precio
     const nights = Math.ceil(
       (new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24),
     );
@@ -233,9 +263,12 @@ export const getReservas = async (req, res) => {
     // Si es admin devuelve todas, si no devuelve solo las reservas del usuario
     const isAdmin = req.user?.role === "admin";
     const filter = isAdmin ? {} : { userId: req.user?.id };
-    const reservas = await Reserva.find(filter).populate("roomId");
+    const reservas = await Reserva.find(filter)
+      .populate("roomId")
+      .populate("userId", "username email") // Poblar userId con username y email
+      .sort({ checkIn: -1 }); // Ordenar por fecha de check-in descendente (más recientes primero)
 
-    // Calcular total si no existe o es 0
+    // Si no pasaron total, lo calculo
     const reservasConTotal = reservas.map((reserva) => {
       const doc = reserva.toObject ? reserva.toObject() : reserva;
       if (!doc.total || doc.total === 0) {
@@ -278,7 +311,6 @@ export const updateReserva = async (req, res) => {
   }
 };
 
-// Eliminar reserva
 export const deleteReserva = async (req, res) => {
   try {
     const reserva = await Reserva.findById(req.params.id);

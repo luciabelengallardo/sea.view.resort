@@ -1,17 +1,33 @@
-import { Waves, Coffee, Dumbbell, Wifi } from 'lucide-react';
+import { Waves, Coffee, Dumbbell, Wifi } from "lucide-react";
 
 const stats = [
-  { label: 'Años de excelencia', value: '12+' },
-  { label: 'Habitaciones y suites', value: '80+' },
-  { label: 'Premios', value: '15' },
-  { label: 'Huéspedes satisfechos', value: '25k+' },
+  { label: "Años de excelencia", value: "12+" },
+  { label: "Habitaciones y suites", value: "80+" },
+  { label: "Premios", value: "15" },
+  { label: "Huéspedes satisfechos", value: "25k+" },
 ];
 
 const values = [
-  { icon: Waves, title: 'Lujo frente al mar', text: 'Habitaciones diseñadas para ofrecer vistas al océano y serenidad.' },
-  { icon: Wifi, title: 'Confort moderno', text: 'Conectividad de alta velocidad y comodidades para una estadía perfecta.' },
-  { icon: Coffee, title: 'Delicias culinarias', text: 'Experiencias gastronómicas gourmet con ingredientes frescos y locales.' },
-  { icon: Dumbbell, title: 'Bienestar', text: 'Spa y fitness para relajarse, recargar energías y sentirse mejor.' },
+  {
+    icon: Waves,
+    title: "Vista al mar",
+    text: "Habitaciones con vista al océano para disfrutar del paisaje.",
+  },
+  {
+    icon: Wifi,
+    title: "Wi-Fi rápido",
+    text: "Internet de alta velocidad en todo el resort.",
+  },
+  {
+    icon: Coffee,
+    title: "Restaurante",
+    text: "Comidas preparadas con ingredientes frescos y de calidad.",
+  },
+  {
+    icon: Dumbbell,
+    title: "Gym y spa",
+    text: "Equipamiento completo para entrenar y relajarse.",
+  },
 ];
 
 export default function AboutContent() {
@@ -20,18 +36,26 @@ export default function AboutContent() {
       <div className="container">
         <div className="grid md:grid-cols-2 gap-10 items-start">
           <div>
-            <h2 className="text-2xl font-serif text-resort-olive mb-4">Nuestra historia</h2>
+            <h2 className="text-2xl font-serif text-resort-olive mb-4">
+              Nuestra historia
+            </h2>
             <p className="text-resort-slate leading-relaxed">
-              Desde nuestros inicios, Sea View Resort ha recibido a viajeros de todo el mundo con una promesa de
-              confort, elegancia y experiencias memorables. Combinamos diseño contemporáneo con encanto costero para
-              crear un oasis donde cada detalle está pensado para su disfrute.
+              Sea View Resort lleva varios años recibiendo huéspedes que buscan
+              relajarse frente al mar. El lugar combina comodidad moderna con la
+              tranquilidad de estar cerca de la playa. Todo pensado para que
+              disfrutes de unas buenas vacaciones.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             {stats.map((s) => (
-              <div key={s.label} className="text-center p-4 rounded-lg bg-resort-cream">
-                <div className="text-2xl font-semibold text-resort-olive">{s.value}</div>
+              <div
+                key={s.label}
+                className="text-center p-4 rounded-lg bg-resort-cream"
+              >
+                <div className="text-2xl font-semibold text-resort-olive">
+                  {s.value}
+                </div>
                 <div className="text-sm text-resort-slate">{s.label}</div>
               </div>
             ))}
@@ -51,5 +75,3 @@ export default function AboutContent() {
     </section>
   );
 }
-
-

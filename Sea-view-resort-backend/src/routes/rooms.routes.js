@@ -32,5 +32,11 @@ router.delete(
   authRole(["admin"]),
   deleteImage,
 );
+router.delete(
+  "/:id/images",
+  authRequired,
+  authRole(["admin"]),
+  deleteImage,
+);
 
 export default router;

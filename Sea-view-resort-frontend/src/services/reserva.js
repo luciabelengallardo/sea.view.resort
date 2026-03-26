@@ -1,21 +1,3 @@
-// Servicio de reservas (aplicable a SOLID - DIP)
-// Maneja todas las operaciones relacionadas con reservas
-
-/**
- * @typedef {Object} ReservationData
- * @property {string} habitacion - Nombre de la habitación
- * @property {string} destino - Destino de la reserva
- * @property {string} huespedes - Cantidad de huéspedes
- * @property {string} checkIn - Fecha de check-in
- * @property {string} checkOut - Fecha de check-out
- * @property {number} precioPorNoche - Precio por noche
- */
-
-/**
- * Crear una nueva reserva
- * @param {ReservationData} reservationData - Datos de la reserva
- * @returns {Promise<Object>} - Reserva creada
- */
 import { fetchApi } from "./http";
 
 export const createReservation = async (reservationData) => {
@@ -58,10 +40,6 @@ export const createReservation = async (reservationData) => {
   }
 };
 
-/**
- * Obtener todas las reservas
- * @returns {Promise<Array>} - Lista de reservas
- */
 export const getReservations = async () => {
   try {
     const response = await fetchApi("/api/reservas"); //  Esta URL está bien
@@ -75,13 +53,6 @@ export const getReservations = async () => {
   }
 };
 
-/**
- * Verificar disponibilidad de una habitación
- * @param {string} roomId - ID de la habitación
- * @param {string} checkIn - Fecha de check-in
- * @param {string} checkOut - Fecha de check-out
- * @returns {Promise<Object>} - Resultado de disponibilidad
- */
 export const checkAvailability = async (roomId, checkIn, checkOut) => {
   try {
     const response = await fetchApi(
@@ -98,12 +69,6 @@ export const checkAvailability = async (roomId, checkIn, checkOut) => {
   }
 };
 
-/**
- * Actualizar una reserva
- * @param {string} reservationId - ID de la reserva
- * @param {Object} updateData - Datos a actualizar
- * @returns {Promise<Object>} - Reserva actualizada
- */
 export const updateReservation = async (reservationId, updateData) => {
   try {
     const response = await fetchApi(`/api/reservas/${reservationId}`, {
@@ -126,11 +91,6 @@ export const updateReservation = async (reservationId, updateData) => {
   }
 };
 
-/**
- * Eliminar una reserva
- * @param {string} reservationId - ID de la reserva
- * @returns {Promise<Object>} - Resultado de la eliminación
- */
 export const deleteReservation = async (reservationId) => {
   try {
     const response = await fetchApi(`/api/reservas/${reservationId}`, {

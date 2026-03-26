@@ -19,7 +19,6 @@ import PasswordChange from "./pages/PasswordChange.jsx";
 import AdminRooms from "./pages/admin/AdminRooms.jsx";
 import Administrador from "./pages/admin/Administrador.jsx";
 import ManageUsers from "./pages/admin/ManageUsers.jsx";
-import ChatbotWidget from "./components/chatbot/ChatbotWidget.jsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 
 function ProtectedRoute({ children }) {
@@ -36,20 +35,6 @@ function AdminRoute({ children }) {
 
 export default function App() {
   const { user, loading } = useAuth();
-  const location = useLocation();
-
-  const chatbotHiddenRoutes = [
-    "/admin",
-    "/admin/rooms",
-    "/admin/users",
-    "/admin/manage-users",
-    "/login",
-    "/register",
-  ];
-
-  const isChatbotHidden = chatbotHiddenRoutes.some((route) =>
-    location.pathname.startsWith(route),
-  );
 
   if (loading) {
     return (
@@ -130,8 +115,6 @@ export default function App() {
           }
         />
       </Routes>
-
-      {!isChatbotHidden && <ChatbotWidget />}
     </>
   );
 }

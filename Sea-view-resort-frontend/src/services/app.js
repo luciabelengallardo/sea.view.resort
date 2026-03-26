@@ -24,10 +24,12 @@ export const getRooms = async () => {
 
 export const crearRoom = async (dato) => {
   try {
+    const token = localStorage.getItem("token");
     const respuesta = await fetch(`${urlRooms}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(dato),
     });
@@ -50,10 +52,12 @@ export const getRoomByID = async (id) => {
 
 export const updateRoom = async (id, producto) => {
   try {
+    const token = localStorage.getItem("token");
     const respuesta = await fetch(`${urlRooms}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(producto),
     });
@@ -66,8 +70,12 @@ export const updateRoom = async (id, producto) => {
 
 export const deleteRoom = async (id) => {
   try {
+    const token = localStorage.getItem("token");
     const respuesta = await fetch(`${urlRooms}/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return await parseResponse(respuesta);
   } catch (error) {
@@ -102,9 +110,13 @@ export const listAvailableImages = async () => {
 
 export const deleteImage = async (id, imageUrl) => {
   try {
+    const token = localStorage.getItem("token");
     const respuesta = await fetch(`${urlRooms}/${id}/images`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ imageUrl }),
     });
     return await parseResponse(respuesta);

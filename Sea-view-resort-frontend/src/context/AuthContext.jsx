@@ -7,7 +7,6 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const getToken = () => localStorage.getItem("token");
@@ -38,7 +37,6 @@ export const AuthProvider = ({ children }) => {
     }
     authService.logoutLocal();
     setUser(null);
-    setProfileImage(null);
   };
 
   const getProfile = async () => {
@@ -49,11 +47,6 @@ export const AuthProvider = ({ children }) => {
     }
     const data = await authService.profile();
     setUser(data);
-
-    if (data.profileImage) {
-      const base = import.meta.env.VITE_PUBLIC_API_BASE || "";
-      setProfileImage(`${base}${data.profileImage}`);
-    }
     return data;
   };
 

@@ -22,13 +22,11 @@ function VerifyEmail() {
       }
 
       try {
-        const res = await axios.get(
-          `/api/v1/verify-email?token=${token}`
-        );
+        const res = await axios.get(`/api/auth/verify-email?token=${token}`);
 
         if (isMounted && res.data.success) {
           setStatus(
-            "¡Listo! Tu email está verificado. Inicia sesión para continuar."
+            "¡Listo! Tu email está verificado. Inicia sesión para continuar.",
           );
           setVerified(true);
         }

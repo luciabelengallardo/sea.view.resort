@@ -93,20 +93,44 @@ export const uploadImage = async (req, res) => {
 export const deleteImage = async (req, res) => {
   try {
     const { id, index } = req.params;
+    const { imageUrl } = req.body;
+
     const room = await Room.findById(id);
     if (!room)
       return res.status(404).json({ message: "Habitación no encontrada" });
 
-    const idx = parseInt(index);
-    if (isNaN(idx) || idx < 0 || idx >= room.images.length) {
-      return res.status(400).json({ message: "Índice inválido" });
+    let imageToDelete;
+    let idxToDelete;
+
+    // Si viene imageUrl en el body, buscar por URL
+    if (imageUrl) {
+      idxToDelete = room.images.findIndex((img) => img === imageUrl);
+      if (idxToDelete === -1) {
+        return res.status(404).json({ message: "Imagen no encontrada" });
+      }
+      imageToDelete = imageUrl;
+    }
+    // Si viene index en params, usar índice
+    else if (index !== undefined) {
+      const idx = parseInt(index);
+      if (isNaN(idx) || idx < 0 || idx >= room.images.length) {
+        return res.status(400).json({ message: "Índice inválido" });
+      }
+      idxToDelete = idx;
+      imageToDelete = room.images[idx];
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Debe proporcionar imageUrl o index" });
     }
 
-    const imageToDelete = room.images[idx];
-    const filePath = path.resolve("uploads", path.basename(imageToDelete));
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    // Si es una imagen local (no URL de Unsplash), intentar eliminar archivo
+    if (!imageToDelete.startsWith("http")) {
+      const filePath = path.resolve("uploads", path.basename(imageToDelete));
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
 
-    room.images.splice(idx, 1);
+    room.images.splice(idxToDelete, 1);
     await room.save();
 
     res.json(room);

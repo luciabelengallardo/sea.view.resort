@@ -25,6 +25,12 @@ const roomSchema = new mongoose.Schema(
       maxlength: [440, "La descripción no puede superar los 440 caracteres"],
     },
     images: [{ type: String }],
+    maxGuests: {
+      type: Number,
+      default: 4,
+      min: [1, "Debe permitir al menos 1 huésped"],
+      max: [20, "Máximo 20 huéspedes por habitación"],
+    },
   },
   {
     timestamps: true,

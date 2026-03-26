@@ -5,25 +5,10 @@ export const formatDate = (dateString, locale = "es-ES", options) => {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC" // Usar UTC para evitar desfases de timezone
   };
 
-  // Si la fecha viene en formato ISO 'YYYY-MM-DD', crear la fecha como local
-  // para evitar desfases por zona horaria (new Date('YYYY-MM-DD') se trata como UTC)
-  const isoDateOnly = /^\d{4}-\d{2}-\d{2}$/;
-
-  let d;
-  if (isoDateOnly.test(String(dateString))) {
-    // Formato: YYYY-MM-DD
-    d = new Date(String(dateString) + "T00:00:00");
-  } else if (String(dateString).includes("T")) {
-    // Formato: YYYY-MM-DDTHH:mm:ssZ o ISO completo
-    // Extraer solo la parte de fecha para evitar desplazamientos
-    const datePart = String(dateString).split("T")[0];
-    d = new Date(datePart + "T00:00:00");
-  } else {
-    d = new Date(dateString);
-  }
-
+  const d = new Date(dateString);
   return d.toLocaleDateString(locale, options || defaultOptions);
 };
 

@@ -34,10 +34,10 @@ export default function DateRangePicker({
     return date.toISOString().split("T")[0];
   };
 
-  // Convertir disabledDates a Set para búsqueda O(1)
+  // convertir disabledDates a Set para búsqueda O(1)
   const disabledSet = new Set(disabledDates);
 
-  // Función para verificar si hay conflicto en el rango
+  // funcion para verificar si hay conflicto en el rango
   const hasConflictInRange = (start, end) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
@@ -56,10 +56,10 @@ export default function DateRangePicker({
     const dateLower = new Date(date);
     dateLower.setHours(0, 0, 0, 0);
 
-    // Bloquear fechas pasadas
+    // bloquear fechas pasadas
     if (dateLower < today) return true;
 
-    // Bloquear fechas ocupadas
+    // bloquear fechas ocupadas
     if (disabledSet.has(dateStr)) return true;
 
     return false;
@@ -81,7 +81,7 @@ export default function DateRangePicker({
     return currentDate > checkInDate && currentDate < checkOutDate;
   };
 
-  // Función para generar días del calendario
+  // funcion para generar días del calendario
   const getDaysInMonth = (date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   };
@@ -95,12 +95,12 @@ export default function DateRangePicker({
     const firstDay = getFirstDayOfMonth(month);
     const days = [];
 
-    // Días vacíos al inicio
+    // dias vacios al inicio
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
 
-    // Días del mes
+    // dias del mes
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(new Date(month.getFullYear(), month.getMonth(), i));
     }
@@ -111,20 +111,20 @@ export default function DateRangePicker({
   const handleDateClick = (date, isCheckOut = false) => {
     const dateStr = toISODate(date);
 
-    // No permitir fechas pasadas
+    // no permitir fechas pasadas
     if (date < today) {
       toast.error("No puedes seleccionar una fecha pasada.");
       return;
     }
 
-    // Verificar si la fecha seleccionada está ocupada
+    // verificar si la fecha seleccionada esta ocupada
     if (disabledSet.has(dateStr)) {
       toast.error(`La fecha ${dateStr} no está disponible.`);
       return;
     }
 
     if (isCheckOut) {
-      // Verificar si hay conflicto en el rango
+      // verificar si hay conflicto en el rango
       if (checkIn) {
         const conflictDate = hasConflictInRange(checkIn, dateStr);
         if (conflictDate) {
@@ -135,7 +135,7 @@ export default function DateRangePicker({
       onChange("checkOut", dateStr);
       setShowCheckOutCal(false);
     } else {
-      // Si ya hay un checkOut, verificar si hay conflicto en el rango
+      // si ya hay un checkout, verificar si hay conflicto en el rango
       if (checkOut) {
         const conflictDate = hasConflictInRange(dateStr, checkOut);
         if (conflictDate) {
@@ -162,24 +162,24 @@ export default function DateRangePicker({
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-72">
-        {/* Header */}
+        {/* header */}
         <div className="flex justify-between items-center mb-4">
           <button
             onClick={onPrevMonth}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-2 hover:bg-white/80 bg-white/60 backdrop-blur-sm rounded-lg transition-all"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-6 h-6 text-gray-700" />
           </button>
           <h3 className="font-semibold text-sm capitalize">{monthName}</h3>
           <button
             onClick={onNextMonth}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-2 hover:bg-white/80 bg-white/60 backdrop-blur-sm rounded-lg transition-all"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-6 h-6 text-gray-700" />
           </button>
         </div>
 
-        {/* Days of week */}
+        {/* dias de la semana */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {["L", "M", "M", "J", "V", "S", "D"].map((day) => (
             <div
@@ -191,7 +191,7 @@ export default function DateRangePicker({
           ))}
         </div>
 
-        {/* Days */}
+        {/* dias */}
         <div className="grid grid-cols-7 gap-1">
           {days.map((date, idx) => {
             if (!date) {
@@ -253,9 +253,9 @@ export default function DateRangePicker({
 
   return (
     <div className="w-full">
-      {/* Inputs lado a lado */}
+      {/* inputs lado a lado */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Check-in */}
+        {/* checkin */}
         <div className="flex flex-col items-start gap-2">
           <div className="flex items-center gap-2 text-sm md:text-xs text-resort-slate whitespace-nowrap shrink min-w-0 w-full overflow-hidden">
             <Calendar className="w-4 h-4" />
@@ -291,7 +291,7 @@ export default function DateRangePicker({
           </div>
         </div>
 
-        {/* Check-out */}
+        {/* check-out */}
         <div className="flex flex-col items-start gap-2">
           <div className="flex items-center gap-2 text-sm md:text-xs text-resort-slate whitespace-nowrap shrink min-w-0 w-full overflow-hidden">
             <CalendarDays className="w-4 h-4" />
