@@ -19,6 +19,9 @@ export default function SearchFilters() {
   const { user } = useAuth();
   const { rooms } = useRooms();
 
+  console.log("🔍 [SearchFilters] Rooms disponibles:", rooms);
+  console.log("🔍 [SearchFilters] Total rooms:", rooms?.length);
+
   const [filters, setFilters] = useState({
     habitacion: "",
     huespedes: "2 Adultos",
