@@ -99,7 +99,7 @@ export default function AdminReservations() {
           Pasada
         </span>
       );
-    } else if (checkInDate <= today && checkOutDate >= today) {
+    } else if (checkInDate <= today && checkOutDate > today) {
       return (
         <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
           Activa
@@ -124,7 +124,7 @@ export default function AdminReservations() {
       checkIn.setHours(0, 0, 0, 0);
       const checkOut = new Date(r.checkOut);
       checkOut.setHours(0, 0, 0, 0);
-      return checkIn <= today && checkOut >= today;
+      return checkIn <= today && checkOut > today;
     }).length,
     proximas: reservations.filter((r) => {
       const today = new Date();

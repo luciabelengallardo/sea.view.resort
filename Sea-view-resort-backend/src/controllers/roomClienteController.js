@@ -173,7 +173,7 @@ export const createReserva = async (req, res) => {
       checkOut = parseDate(checkOut);
     }
 
-    // Que no reserve en el pasado
+    // Que no reserve en el pasado (permite reservar desde hoy)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const checkInDate = new Date(checkIn);

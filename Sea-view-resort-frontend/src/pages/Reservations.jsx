@@ -58,7 +58,7 @@ export default function Reservations() {
     if (!form.checkIn || !form.checkOut)
       return setError("Seleccione fechas de entrada y salida");
 
-    // Validar fechas no sean pasadas
+    // Validar fechas no sean pasadas (permite reservar desde hoy)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const checkInDate = new Date(form.checkIn);

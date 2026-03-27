@@ -12,7 +12,6 @@ export function RoomsProvider({ children }) {
       try {
         const resp = await axios.get(apiUrl("/api/rooms"));
         const data = resp.data;
-        // Backend puede devolver { datos: [...] } o directamente un array
         const backendRooms = Array.isArray(data)
           ? data
           : Array.isArray(data?.datos)

@@ -249,7 +249,7 @@ export function ReservationsList({ userId }) {
                                 Pasada
                               </span>
                             );
-                          } else if (checkIn <= today && checkOut >= today) {
+                          } else if (checkIn <= today && checkOut > today) {
                             return (
                               <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
                                 Activa

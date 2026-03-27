@@ -103,7 +103,7 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
   };
 
   const handleSearch = async () => {
-    // validar fechas no sean pasadas
+    // validar fechas no sean pasadas (permite reservar desde hoy)
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const checkInDate = new Date(bookingData.checkIn);
