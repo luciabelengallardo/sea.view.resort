@@ -19,9 +19,6 @@ export default function SearchFilters() {
   const { user } = useAuth();
   const { rooms } = useRooms();
 
-  console.log("🔍 [SearchFilters] Rooms disponibles:", rooms);
-  console.log("🔍 [SearchFilters] Total rooms:", rooms?.length);
-
   const [filters, setFilters] = useState({
     habitacion: "",
     huespedes: "2 Adultos",
@@ -89,10 +86,15 @@ export default function SearchFilters() {
     }
 
     // Validar fechas no sean pasadas (permite reservar desde hoy)
+    // Comparar solo fechas (YYYY-MM-DD) para evitar problemas de timezone
+    if (!filters.checkIn || !filters.checkOut) {
+      toast.error("Por favor selecciona las fechas de check-in y check-out");
+      return;
+    }
+
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const checkInDate = new Date(filters.checkIn);
-    checkInDate.setHours(0, 0, 0, 0);
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const checkInDate = filters.checkIn.split('T')[0];
 
     if (checkInDate < today) {
       toast.error("No se pueden reservar fechas pasadas");

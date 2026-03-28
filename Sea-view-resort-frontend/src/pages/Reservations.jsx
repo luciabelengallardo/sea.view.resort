@@ -59,10 +59,13 @@ export default function Reservations() {
       return setError("Seleccione fechas de entrada y salida");
 
     // Validar fechas no sean pasadas (permite reservar desde hoy)
+    // Comparar solo fechas (YYYY-MM-DD) para evitar problemas de timezone
+    if (!form.checkIn || !form.checkOut)
+      return setError("Seleccione fechas de entrada y salida");
+
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const checkInDate = new Date(form.checkIn);
-    checkInDate.setHours(0, 0, 0, 0);
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const checkInDate = form.checkIn.split('T')[0];
 
     if (checkInDate < today)
       return setError("No se pueden reservar fechas pasadas");

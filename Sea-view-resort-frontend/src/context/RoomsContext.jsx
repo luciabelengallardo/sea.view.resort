@@ -26,8 +26,7 @@ export function RoomsProvider({ children }) {
           ),
         }));
 
-        console.log("🏨 [RoomsContext] Habitaciones cargadas:", normalized);
-        console.log("🏨 [RoomsContext] Total:", normalized.length);
+
         setRooms(normalized);
       } catch (error) {
         console.error("No se pudo conectar al backend:", error);

@@ -236,12 +236,11 @@ export function ReservationsList({ userId }) {
                       </p>
                       <p className="text-sm">
                         {(() => {
-                          const today = new Date();
-                          today.setHours(0, 0, 0, 0);
-                          const checkIn = new Date(reservation.checkIn);
-                          checkIn.setHours(0, 0, 0, 0);
-                          const checkOut = new Date(reservation.checkOut);
-                          checkOut.setHours(0, 0, 0, 0);
+                          // Comparar solo las fechas (YYYY-MM-DD) para evitar problemas de timezone
+                          const todayDate = new Date();
+                          const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
+                          const checkIn = reservation.checkIn.split('T')[0];
+                          const checkOut = reservation.checkOut.split('T')[0];
 
                           if (checkOut < today) {
                             return (

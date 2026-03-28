@@ -86,20 +86,19 @@ export default function AdminReservations() {
   };
 
   const getStatusBadge = (checkIn, checkOut) => {
+    // Comparar solo las fechas (YYYY-MM-DD) para evitar problemas de timezone
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const checkInDate = new Date(checkIn);
-    checkInDate.setHours(0, 0, 0, 0);
-    const checkOutDate = new Date(checkOut);
-    checkOutDate.setHours(0, 0, 0, 0);
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const checkInDate = checkIn.split('T')[0];
+    const checkOutDate = checkOut.split('T')[0];
 
-    if (checkOutDate < today) {
+    if (checkOutDate < todayStr) {
       return (
         <span className="px-2 py-1 text-xs rounded-full bg-gray-200 text-gray-700">
           Pasada
         </span>
       );
-    } else if (checkInDate <= today && checkOutDate > today) {
+    } else if (checkInDate <= todayStr && checkOutDate > todayStr) {
       return (
         <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
           Activa
@@ -119,25 +118,21 @@ export default function AdminReservations() {
     total: reservations.length,
     activas: reservations.filter((r) => {
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const checkIn = new Date(r.checkIn);
-      checkIn.setHours(0, 0, 0, 0);
-      const checkOut = new Date(r.checkOut);
-      checkOut.setHours(0, 0, 0, 0);
-      return checkIn <= today && checkOut > today;
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const checkIn = r.checkIn.split('T')[0];
+      const checkOut = r.checkOut.split('T')[0];
+      return checkIn <= todayStr && checkOut > todayStr;
     }).length,
     proximas: reservations.filter((r) => {
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const checkIn = new Date(r.checkIn);
-      checkIn.setHours(0, 0, 0, 0);
-      return checkIn > today;
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const checkIn = r.checkIn.split('T')[0];
+      return checkIn > todayStr;
     }).length,
     pasadas: reservations.filter((r) => {
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const checkOut = new Date(r.checkOut);
-      checkOut.setHours(0, 0, 0, 0);
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const checkOut = r.checkOut.split('T')[0];
       return checkOut < today;
     }).length,
   };
