@@ -15,6 +15,11 @@ export default function MainLayout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
 
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location.pathname]);
+
   useEffect(() => {
     const updateHeaderHeightVar = () => {
       const height = headerRef.current
@@ -22,7 +27,7 @@ export default function MainLayout() {
         : 0;
       document.documentElement.style.setProperty(
         "--app-header-height",
-        `${height}px`
+        `${height}px`,
       );
     };
 
@@ -42,7 +47,7 @@ export default function MainLayout() {
     };
   }, []);
   return (
-    <div className="min-h-screen bg-resort-cream flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-resort-cream flex flex-col">
       <header
         ref={headerRef}
         className="fixed top-0 left-0 right-0 z-30 flex flex-wrap justify-between items-center px-6 lg:px-8 py-4 lg:py-5 bg-white shadow-sm"
@@ -93,7 +98,10 @@ export default function MainLayout() {
         logout={logout}
       />
 
-      <main className="flex-1" style={{ paddingTop: "var(--app-header-height, 64px)" }}>
+      <main
+        className="flex-1"
+        style={{ paddingTop: "var(--app-header-height, 64px)" }}
+      >
         <Outlet />
       </main>
 

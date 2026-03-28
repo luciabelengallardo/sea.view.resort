@@ -57,6 +57,15 @@ export default function MobileMenu({ isOpen, onClose, user, logout }) {
               {item.name}
             </Link>
           ))}
+          {user && (
+            <Link
+              to="/profile"
+              className="text-gray-700 hover:text-resort-olive font-medium"
+              onClick={onClose}
+            >
+              Mis Reservas
+            </Link>
+          )}
           <Link to="/rooms" onClick={onClose}>
             <Button className="mt-5 rounded-full px-6">Reservar</Button>
           </Link>

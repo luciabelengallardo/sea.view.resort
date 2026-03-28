@@ -16,8 +16,10 @@ export function ProfileHeader({ user }) {
             </AvatarFallback>
           </Avatar>
 
-          <div className="flex-1 pb-1">
-            <h1 className="text-3xl font-bold tracking-tight">{user.email}</h1>
+          <div className="flex-1 pb-1 min-w-0">
+            <h1 className="text-xl font-bold tracking-tight break-words">
+              {user.email}
+            </h1>
             <p className="text-muted-foreground mt-1">Huésped</p>
           </div>
         </div>

@@ -166,7 +166,7 @@ export default function DateRangePicker({
     });
 
     return (
-      <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-72">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 sm:p-4 w-[280px] sm:min-w-72 max-w-[90vw]">
         {/* header */}
         <div className="flex justify-between items-center mb-4">
           <button
@@ -185,11 +185,11 @@ export default function DateRangePicker({
         </div>
 
         {/* dias de la semana */}
-        <div className="grid grid-cols-7 gap-1 mb-2">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
           {["L", "M", "M", "J", "V", "S", "D"].map((day, idx) => (
             <div
               key={`${day}-${idx}`}
-              className="text-center text-xs font-semibold text-gray-600"
+              className="text-center text-[10px] sm:text-xs font-semibold text-gray-600"
             >
               {day}
             </div>
@@ -197,10 +197,10 @@ export default function DateRangePicker({
         </div>
 
         {/* dias */}
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
           {days.map((date, idx) => {
             if (!date) {
-              return <div key={`empty-${idx}`} className="h-8"></div>;
+              return <div key={`empty-${idx}`} className="h-7 sm:h-8"></div>;
             }
 
             const disabled = isDateDisabled(date);
@@ -220,7 +220,7 @@ export default function DateRangePicker({
                   }
                 }}
                 disabled={disabled}
-                className={`h-8 text-xs rounded relative transition-colors ${
+                className={`h-7 sm:h-8 text-[10px] sm:text-xs rounded relative transition-colors ${
                   disabled
                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                     : selected
@@ -273,7 +273,10 @@ export default function DateRangePicker({
               value={checkIn || ""}
               readOnly
               placeholder="Selecciona fecha"
-              onClick={() => setShowCheckInCal(!showCheckInCal)}
+              onClick={() => {
+                setShowCheckInCal(!showCheckInCal);
+                setShowCheckOutCal(false);
+              }}
               className="flex h-10 w-full items-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-resort-olive focus:border-resort-olive cursor-pointer hover:border-blue-400"
             />
             {showCheckInCal && (
@@ -309,11 +312,14 @@ export default function DateRangePicker({
               value={checkOut || ""}
               readOnly
               placeholder="Selecciona fecha"
-              onClick={() => setShowCheckOutCal(!showCheckOutCal)}
+              onClick={() => {
+                setShowCheckOutCal(!showCheckOutCal);
+                setShowCheckInCal(false);
+              }}
               className="flex h-10 w-full items-center rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-resort-olive focus:border-resort-olive cursor-pointer hover:border-blue-400"
             />
             {showCheckOutCal && (
-              <div className="absolute top-full left-0 mt-2 z-10">
+              <div className="absolute top-full right-0 mt-2 z-10">
                 <CalendarComponent
                   month={checkOutMonth}
                   isCheckOut={true}

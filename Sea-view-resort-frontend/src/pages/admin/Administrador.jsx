@@ -60,7 +60,7 @@ export default function Administrador() {
   };
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
       <header className="bg-white shadow-sm border-b flex-shrink-0">
         <div className="flex items-center justify-between px-4 py-4">
@@ -138,7 +138,7 @@ export default function Administrador() {
       </header>
 
       {/* Flex container for sidebar and main */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         {/* Sidebar */}
         <aside
           className={`

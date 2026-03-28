@@ -6,7 +6,7 @@ import { Wifi, Coffee, Waves, ChevronLeft, ChevronRight } from "lucide-react";
 import ImageGalleryModal from "./ImageGalleryModal.jsx";
 
 export default function RoomCard({
-  id = "demo-room",
+  id,
   imageUrl,
   imageUrls = [],
   title,

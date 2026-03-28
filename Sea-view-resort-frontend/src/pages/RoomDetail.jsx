@@ -29,10 +29,20 @@ export default function RoomDetail() {
   const { id } = useParams();
   const { rooms } = useRooms();
 
-  const room = useMemo(
-    () => rooms.find((r) => r.id === parseInt(id, 10) || r._id === id),
-    [id, rooms],
-  );
+  const room = useMemo(() => {
+    if (!id) return null;
+    return rooms.find(
+      (r) => r.id === id || r._id === id || r.id === parseInt(id, 10),
+    );
+  }, [id, rooms]);
+
+  if (!id || rooms.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Cargando...</p>
+      </div>
+    );
+  }
 
   if (!room) return <p className="p-8 text-center">Habitación no encontrada</p>;
 
