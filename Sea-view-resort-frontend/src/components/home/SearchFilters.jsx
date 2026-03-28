@@ -13,6 +13,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useRooms } from "../../context/RoomsContext";
 import { toast } from "react-hot-toast";
 import { checkAvailability, createReservation } from "../../services/reserva";
+import { apiUrl } from "../../services/http";
 
 export default function SearchFilters() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function SearchFilters() {
     try {
       // Consultar fechas ocupadas sin requerir autenticación
       const response = await axios.get(
-        `/api/reservas/rooms/${roomId}/occupied-dates`,
+        apiUrl(`/api/reservas/rooms/${roomId}/occupied-dates`),
       );
 
       setDisabledDates(response.data.occupiedDates || []);

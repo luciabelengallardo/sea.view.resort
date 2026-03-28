@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import Modal from "../ui/Modal";
 import { X, Calendar, CheckCircle, XCircle, Clock } from "lucide-react";
 import { formatDate, formatPrice } from "../../lib/formatters";
-import AlternativeDatesCalendar from "./AlternativeDatesCalendar";
 
 export default function AvailabilityModal({
   isOpen,
@@ -198,25 +197,6 @@ export default function AvailabilityModal({
                   </div>
                 </div>
               </div>
-
-              {/* Días disponibles alternativos */}
-              {availabilityData?.diasDisponibles &&
-                availabilityData.diasDisponibles.length > 0 && (
-                  <div className="p-4 rounded-lg">
-                    <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      Fechas alternativas disponibles:
-                    </h4>
-                    <AlternativeDatesCalendar
-                      asModal={false}
-                      isOpen
-                      dates={availabilityData?.diasDisponibles || []}
-                      onSelect={(d) => onSelectAlternativeDate(d)}
-                      title="Selecciona una fecha alternativa"
-                      compact
-                    />
-                  </div>
-                )}
             </div>
           )}
         </CardContent>

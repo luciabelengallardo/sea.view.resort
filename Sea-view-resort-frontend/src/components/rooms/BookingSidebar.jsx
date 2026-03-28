@@ -18,6 +18,7 @@ import SuccessModal from "../booking/SuccessModal";
 import LoginRequiredModal from "../auth/LoginRequiredModal";
 import DateRangePicker from "../search/DateRangePicker";
 import { checkAvailability, createReservation } from "../../services/reserva";
+import { apiUrl } from "../../services/http";
 
 export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ export default function BookingSidebar({ pricePerNight, roomName, roomId }) {
     const fetchDisabledDates = async () => {
       try {
         const response = await axios.get(
-          `/api/reservas/rooms/${roomId}/occupied-dates`,
+          apiUrl(`/api/reservas/rooms/${roomId}/occupied-dates`),
         );
         setDisabledDates(response.data.occupiedDates || []);
       } catch (error) {
