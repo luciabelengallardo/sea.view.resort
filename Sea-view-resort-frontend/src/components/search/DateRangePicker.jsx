@@ -26,12 +26,17 @@ export default function DateRangePicker({
     return d;
   });
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
   const toISODate = (d) => {
     const date = new Date(d);
     return date.toISOString().split("T")[0];
+  };
+
+  // Obtener fecha local en formato YYYY-MM-DD (sin conversión a UTC)
+  const getLocalDateString = (date = new Date()) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   // convertir disabledDates a Set para búsqueda O(1)
@@ -53,11 +58,10 @@ export default function DateRangePicker({
 
   const isDateDisabled = (date) => {
     const dateStr = toISODate(date);
-    const dateLower = new Date(date);
-    dateLower.setHours(0, 0, 0, 0);
+    const todayStr = getLocalDateString();
 
     // bloquear fechas pasadas
-    if (dateLower < today) return true;
+    if (dateStr < todayStr) return true;
 
     // bloquear fechas ocupadas
     if (disabledSet.has(dateStr)) return true;
@@ -110,9 +114,10 @@ export default function DateRangePicker({
 
   const handleDateClick = (date, isCheckOut = false) => {
     const dateStr = toISODate(date);
+    const todayStr = getLocalDateString();
 
     // no permitir fechas pasadas
-    if (date < today) {
+    if (dateStr < todayStr) {
       toast.error("No puedes seleccionar una fecha pasada.");
       return;
     }
@@ -203,7 +208,8 @@ export default function DateRangePicker({
             const inRange = isDateInRange(date);
             const dateStr = toISODate(date);
             const isOccupied = disabledSet.has(dateStr);
-            const isPast = date < today;
+            const todayStr = getLocalDateString();
+            const isPast = dateStr < todayStr;
 
             return (
               <button

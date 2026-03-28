@@ -152,7 +152,7 @@ export default function AvailabilityModal({
                       </h3>
                       <p className="mt-1 text-red-800 text-sm">
                         Necesitas estar logueado para confirmar tu reserva. Al
-                        hacer clic en «Confirmar Reserva» serás redirigido a la
+                        hacer clic en «Iniciar Sesión» serás redirigido a la
                         página de login.
                       </p>
                     </div>
