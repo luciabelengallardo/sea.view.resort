@@ -93,8 +93,8 @@ export default function SearchFilters() {
     }
 
     const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const checkInDate = filters.checkIn.split('T')[0];
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const checkInDate = filters.checkIn.split("T")[0];
 
     if (checkInDate < today) {
       toast.error("No se pueden reservar fechas pasadas");

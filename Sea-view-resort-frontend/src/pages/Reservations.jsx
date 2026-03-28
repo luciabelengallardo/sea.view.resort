@@ -64,8 +64,8 @@ export default function Reservations() {
       return setError("Seleccione fechas de entrada y salida");
 
     const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const checkInDate = form.checkIn.split('T')[0];
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const checkInDate = form.checkIn.split("T")[0];
 
     if (checkInDate < today)
       return setError("No se pueden reservar fechas pasadas");

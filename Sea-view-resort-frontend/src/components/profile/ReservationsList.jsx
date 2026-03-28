@@ -238,9 +238,9 @@ export function ReservationsList({ userId }) {
                         {(() => {
                           // Comparar solo las fechas (YYYY-MM-DD) para evitar problemas de timezone
                           const todayDate = new Date();
-                          const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
-                          const checkIn = reservation.checkIn.split('T')[0];
-                          const checkOut = reservation.checkOut.split('T')[0];
+                          const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, "0")}-${String(todayDate.getDate()).padStart(2, "0")}`;
+                          const checkIn = reservation.checkIn.split("T")[0];
+                          const checkOut = reservation.checkOut.split("T")[0];
 
                           if (checkOut < today) {
                             return (

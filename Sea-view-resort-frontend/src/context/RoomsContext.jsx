@@ -26,7 +26,6 @@ export function RoomsProvider({ children }) {
           ),
         }));
 
-
         setRooms(normalized);
       } catch (error) {
         console.error("No se pudo conectar al backend:", error);

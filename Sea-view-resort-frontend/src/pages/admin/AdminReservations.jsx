@@ -88,9 +88,9 @@ export default function AdminReservations() {
   const getStatusBadge = (checkIn, checkOut) => {
     // Comparar solo las fechas (YYYY-MM-DD) para evitar problemas de timezone
     const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    const checkInDate = checkIn.split('T')[0];
-    const checkOutDate = checkOut.split('T')[0];
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    const checkInDate = checkIn.split("T")[0];
+    const checkOutDate = checkOut.split("T")[0];
 
     if (checkOutDate < todayStr) {
       return (
@@ -118,21 +118,21 @@ export default function AdminReservations() {
     total: reservations.length,
     activas: reservations.filter((r) => {
       const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      const checkIn = r.checkIn.split('T')[0];
-      const checkOut = r.checkOut.split('T')[0];
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      const checkIn = r.checkIn.split("T")[0];
+      const checkOut = r.checkOut.split("T")[0];
       return checkIn <= todayStr && checkOut > todayStr;
     }).length,
     proximas: reservations.filter((r) => {
       const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      const checkIn = r.checkIn.split('T')[0];
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      const checkIn = r.checkIn.split("T")[0];
       return checkIn > todayStr;
     }).length,
     pasadas: reservations.filter((r) => {
       const today = new Date();
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      const checkOut = r.checkOut.split('T')[0];
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+      const checkOut = r.checkOut.split("T")[0];
       return checkOut < today;
     }).length,
   };
